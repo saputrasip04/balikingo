@@ -1,0 +1,4185 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#6366f1">
+  <meta name="description" content="Sistem peminjaman alat broadcasting dan perfilman">
+  <title>BalikinGo — Peminjaman Alat</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%236366f1'/><path d='M22 13h-6v6h6v-6zM21 4v3H11V4H9v3H8C6.34 7 5 8.34 5 10v16c0 1.66 1.34 3 3 3h16c1.66 0 3-1.34 3-3V10c0-1.66-1.34-3-3-3h-1V4h-2zm3 22H8V14h16v12z' fill='white'/></svg>">
+  <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%236366f1'/><path d='M22 13h-6v6h6v-6zM21 4v3H11V4H9v3H8C6.34 7 5 8.34 5 10v16c0 1.66 1.34 3 3 3h16c1.66 0 3-1.34 3-3V10c0-1.66-1.34-3-3-3h-1V4h-2zm3 22H8V14h16v12z' fill='white'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    (function(){
+      try {
+        var m = localStorage.getItem('balikin_view_mode') || 'desktop';
+        document.documentElement.setAttribute('data-view-mode', m);
+      } catch(e) {}
+    })();
+  </script>
+  <style>
+    :root {
+      --bg:#f5f4ff;--surface:#ffffff;--surface2:#f1f0fa;--border:#e4e2f5;
+      --text:#1a1830;--text2:#6b6896;--primary:#6366f1;--pri-lt:#ede9fe;
+      --pri-dk:#4f46e5;--ok:#10b981;--ok-lt:#d1fae5;--danger:#ef4444;
+      --danger-lt:#fee2e2;--warn:#f59e0b;--warn-lt:#fef3c7;
+      --blue:#3b82f6;--blue-lt:#dbeafe;--purple:#8b5cf6;--purple-lt:#ede9fe;
+      --shadow:0 4px 24px rgba(99,102,241,.10);--shadow-sm:0 2px 8px rgba(0,0,0,.07);
+      --r:16px;--r-sm:10px;--r-xs:6px;--font:'Space Grotesk',system-ui,sans-serif;--t:.2s cubic-bezier(.4,0,.2,1);
+    }
+    [data-dark="true"] {
+      --bg:#0f0e1a;--surface:#1a1830;--surface2:#241f3a;--border:#2e2a4a;
+      --text:#f0eeff;--text2:#9b98c0;--pri-lt:#2d2b5a;--ok-lt:#0a2e22;
+      --danger-lt:#2d1010;--warn-lt:#2d2000;--blue-lt:#1e3058;--purple-lt:#2d2558;
+      --shadow:0 4px 24px rgba(0,0,0,.4);--shadow-sm:0 2px 8px rgba(0,0,0,.3);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{height:100%;}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100%;display:flex;flex-direction:column;align-items:center;transition:background var(--t),color var(--t);}
+    #app{width:100%;max-width:520px;min-height:100vh;display:flex;flex-direction:column;}
+    .hidden{display:none!important;}
+    .fade-in{animation:fadeIn .3s ease;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+    /* Login */
+    #login-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;background:linear-gradient(160deg,var(--pri-lt) 0%,var(--bg) 55%);}
+    .login-logo{width:84px;height:84px;border-radius:22px;background:linear-gradient(135deg,var(--primary),var(--pri-dk));display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(99,102,241,.35);margin-bottom:14px;overflow:hidden;}
+    .login-logo svg{width:42px;height:42px;fill:white;}
+    .login-logo img{width:100%;height:100%;object-fit:cover;}
+    .login-org{font-size:22px;font-weight:700;text-align:center;}
+    .login-sub{font-size:13px;color:var(--text2);text-align:center;margin-top:4px;margin-bottom:24px;}
+    .login-tabs{display:flex;background:var(--surface2);border-radius:var(--r-sm);padding:3px;margin-bottom:18px;width:100%;max-width:340px;}
+    .login-tab{flex:1;padding:9px;font-family:var(--font);font-size:13px;font-weight:600;border:none;background:none;border-radius:8px;cursor:pointer;transition:all var(--t);color:var(--text2);}
+    .login-tab.active{background:var(--surface);color:var(--primary);box-shadow:var(--shadow-sm);}
+    .login-box{background:var(--surface);border-radius:var(--r);padding:24px;width:100%;max-width:340px;box-shadow:var(--shadow);border:1px solid var(--border);}
+
+    /* Header */
+    #hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm);}
+    #hdr-logo-ph{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--primary),var(--pri-dk));display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    #hdr-logo-ph svg{width:20px;height:20px;fill:white;}
+    #hdr-logo{width:36px;height:36px;border-radius:9px;object-fit:cover;flex-shrink:0;}
+    #hdr-title{flex:1;min-width:0;}
+    #hdr-title h1{font-size:15px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    #hdr-title small{font-size:11px;color:var(--text2);}
+
+    /* Tabs */
+    #tabs{background:var(--surface);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;scrollbar-width:none;}
+    #tabs::-webkit-scrollbar{display:none;}
+    .tab-btn{flex:0 0 auto;padding:10px 14px;font-family:var(--font);font-size:13px;font-weight:500;color:var(--text2);background:none;border:none;border-bottom:2.5px solid transparent;cursor:pointer;white-space:nowrap;transition:color var(--t),border-color var(--t);min-height:44px;}
+    .tab-btn.active{color:var(--primary);border-bottom-color:var(--primary);}
+    .tab-btn:hover{color:var(--primary);}
+
+    /* Main */
+    #main{flex:1;padding:14px;}
+    .view{display:none;}
+    .view.active{display:block;}
+
+    /* Cards */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:var(--shadow-sm);}
+    .card-title{font-size:14px;font-weight:700;margin-bottom:14px;}
+
+    /* Forms */
+    .fg{margin-bottom:13px;}
+    .fl{display:block;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+    .fi,.fs{width:100%;padding:11px 13px;font-family:var(--font);font-size:14px;color:var(--text);background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);outline:none;transition:border-color var(--t),box-shadow var(--t);min-height:44px;appearance:none;-webkit-appearance:none;}
+    .fi:focus,.fs:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,102,241,.15);background:var(--surface);}
+    .fs{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236b6896' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;}
+
+    /* Buttons */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 17px;font-family:var(--font);font-size:14px;font-weight:600;border:none;border-radius:var(--r-sm);cursor:pointer;transition:all var(--t);min-height:44px;text-decoration:none;}
+    .btn-pri{background:var(--primary);color:#fff;}
+    .btn-pri:hover{background:var(--pri-dk);transform:translateY(-1px);box-shadow:0 4px 14px rgba(99,102,241,.35);}
+    .btn-ok{background:var(--ok);color:#fff;}
+    .btn-ok:hover{background:#059669;}
+    .btn-danger{background:var(--danger);color:#fff;}
+    .btn-danger:hover{background:#dc2626;}
+    .btn-ghost{background:transparent;color:var(--text2);border:1.5px solid var(--border);}
+    .btn-ghost:hover{border-color:var(--primary);color:var(--primary);}
+    .btn-icon{padding:10px;min-height:44px;min-width:44px;background:var(--surface2);color:var(--text2);border:1.5px solid var(--border);border-radius:var(--r-sm);}
+    .btn-icon:hover{color:var(--primary);border-color:var(--primary);}
+    .btn-sm{padding:7px 11px;font-size:12px;min-height:36px;border-radius:var(--r-xs);}
+    .btn-full{width:100%;}
+
+    /* Badges */
+    .badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:700;}
+    .bw{background:var(--warn-lt);color:#92400e;}
+    .bo{background:var(--ok-lt);color:#065f46;}
+    .bn{background:var(--danger-lt);color:#991b1b;}
+    .brt{background:var(--purple-lt);color:#5b21b6;}   /* returning */
+    .br{background:var(--blue-lt);color:#1e40af;}       /* returned */
+    [data-dark="true"] .bw{color:var(--warn);}
+    [data-dark="true"] .bo{color:var(--ok);}
+    [data-dark="true"] .bn{color:var(--danger);}
+    [data-dark="true"] .brt{color:#a78bfa;}
+    [data-dark="true"] .br{color:#93c5fd;}
+
+    /* Stats */
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px;}
+    .stats-4{grid-template-columns:repeat(2,1fr);}
+    .scard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px;text-align:center;}
+    .snum{font-size:26px;font-weight:700;line-height:1;}
+    .slbl{font-size:10px;color:var(--text2);margin-top:3px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+
+    /* Search */
+    .sw{position:relative;margin-bottom:11px;}
+    .si{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text2);pointer-events:none;}
+    .sfi{padding-left:38px!important;}
+
+    /* Request cards */
+    .req{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:13px;margin-bottom:10px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;}
+    .req::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+    .req.wait::before{background:var(--warn);}
+    .req.ok::before{background:var(--ok);}
+    .req.no::before{background:var(--danger);}
+    .req.returning::before{background:var(--purple);}
+    .req.returned::before{background:var(--blue);}
+    .req-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+    .rname{font-weight:700;font-size:14px;}
+    .rmeta{font-size:12px;color:var(--text2);margin-top:2px;}
+    .rthumbs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+    .rthumb{width:48px;height:48px;border-radius:8px;object-fit:cover;border:1.5px solid var(--border);cursor:zoom-in;}
+    .rmore{width:48px;height:48px;border-radius:8px;background:var(--surface2);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text2);}
+    .ract{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+
+    /* Return info box */
+    .ret-box{background:var(--blue-lt);border-radius:var(--r-xs);padding:9px 12px;margin-top:8px;font-size:12px;color:#1e40af;border-left:3px solid var(--blue);}
+    [data-dark="true"] .ret-box{background:#1e3058;color:#93c5fd;border-color:#93c5fd;}
+    .ret-box.pending{background:var(--purple-lt);color:#5b21b6;border-color:var(--purple);}
+    [data-dark="true"] .ret-box.pending{background:#2d2558;color:#a78bfa;border-color:#a78bfa;}
+
+    /* Active borrowed items widget */
+    .active-borrowed-card{background:var(--surface);border:1.5px solid var(--border);border-left:4px solid var(--warn);border-radius:var(--r);padding:14px;margin-bottom:14px;box-shadow:var(--shadow-sm);}
+    .active-borrowed-card.empty-active{border-left-color:var(--ok);}
+    .active-borrowed-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px;}
+    .active-borrowed-title{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;}
+    .active-borrowed-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+    .active-items-scroll{max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;padding-right:2px;}
+    .active-item-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-xs);transition:border-color var(--t);}
+    .active-item-row:hover{border-color:var(--primary);}
+    .active-item-thumb{width:42px;height:42px;border-radius:7px;object-fit:cover;border:1.5px solid var(--border);flex-shrink:0;cursor:zoom-in;}
+    .active-item-info{flex:1;min-width:0;}
+    .active-item-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .active-item-meta{font-size:11px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+    .active-item-meta b{color:var(--text);font-weight:600;}
+
+    /* Item rows in form */
+    .irow{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:10px;transition:border-color var(--t);}
+    .irow:focus-within{border-color:rgba(99,102,241,.45);}
+    .irow-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .irow-num{font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;}
+    .btn-del-item{display:inline-flex;align-items:center;gap:4px;background:none;border:none;color:var(--text2);font-family:var(--font);font-size:11px;font-weight:600;cursor:pointer;padding:3px 7px;border-radius:6px;transition:all var(--t);}
+    .btn-del-item:hover{color:var(--danger);background:var(--danger-lt);}
+
+    /* Satu deret baris: Tombol Foto + Input Nama (Barang maupun Peminjam) */
+    .irow-row{display:flex;align-items:center;gap:8px;}
+    .photo-btn-row{height:44px;padding:0 12px;border-radius:var(--r-sm);border:1.5px dashed var(--border);background:var(--surface);color:var(--text2);font-family:var(--font);font-size:13px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all var(--t);}
+    .photo-btn-row:hover{border-color:var(--primary);color:var(--primary);background:var(--pri-lt);}
+    .photo-btn-row svg{width:18px;height:18px;}
+
+    .photo-slot{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;}
+    .photo-thumb-wrap{position:relative;display:inline-flex;align-items:center;flex-shrink:0;}
+    .photo-thumb{width:44px;height:44px;border-radius:var(--r-sm);object-fit:cover;border:2px solid var(--primary);cursor:zoom-in;flex-shrink:0;box-shadow:0 2px 6px rgba(99,102,241,.18);transition:transform var(--t);}
+    .photo-thumb:hover{transform:scale(1.05);}
+    .borrower-photo-thumb{border-radius:50%;}
+    .photo-thumb-del{position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:var(--danger);color:#fff;border:1.5px solid var(--surface);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:pointer;line-height:1;box-shadow:0 1px 4px rgba(0,0,0,.3);transition:transform var(--t);z-index:2;padding:0;}
+    .photo-thumb-del:hover{transform:scale(1.18);background:#dc2626;}
+    .photo-retake-btn{height:44px;padding:0 10px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--surface);color:var(--text2);font-family:var(--font);font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all var(--t);}
+    .photo-retake-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--pri-lt);}
+
+    .item-name-fi{flex:1;min-width:0;margin:0;}
+
+    /* Photo button for return modal */
+    .photo-btn{width:72px;height:72px;border-radius:10px;border:2px dashed var(--border);background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;font-size:10px;color:var(--text2);font-family:var(--font);flex-shrink:0;transition:border-color var(--t),color var(--t);}
+    .photo-btn:hover{border-color:var(--primary);color:var(--primary);}
+    .photo-btn svg{width:22px;height:22px;}
+    .photo-prev{width:72px;height:72px;border-radius:10px;object-fit:cover;border:2px solid var(--border);cursor:zoom-in;flex-shrink:0;}
+
+    /* Borrower avatar in cards & list */
+    .borrower-avatar{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid var(--primary);box-shadow:var(--shadow-sm);cursor:zoom-in;flex-shrink:0;transition:transform var(--t);}
+    .borrower-avatar:hover{transform:scale(1.08);}
+    .borrower-avatar-initial{width:42px;height:42px;border-radius:50%;background:var(--pri-lt);color:var(--primary);font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--border);}
+
+    /* PJ list */
+    .pj-row{display:flex;align-items:center;gap:10px;padding:11px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:8px;}
+    .pj-av{width:40px;height:40px;border-radius:10px;background:var(--pri-lt);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;}
+    .pj-inf{flex:1;min-width:0;}
+    .pj-name{font-size:14px;font-weight:600;}
+    .pj-div{font-size:12px;color:var(--text2);}
+
+    /* Settings */
+    .setting-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border);}
+    .sl{font-size:14px;font-weight:500;}
+    .sd{font-size:12px;color:var(--text2);margin-top:2px;}
+    .toggle{width:44px;height:24px;border-radius:12px;background:var(--border);position:relative;cursor:pointer;transition:background var(--t);flex-shrink:0;border:none;}
+    .toggle.on{background:var(--primary);}
+    .toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:white;top:3px;left:3px;transition:transform var(--t);box-shadow:0 1px 4px rgba(0,0,0,.2);}
+    .toggle.on::after{transform:translateX(20px);}
+
+    /* Banner */
+    .banner{border-radius:var(--r-sm);padding:12px 14px;margin-bottom:12px;font-size:13px;display:flex;align-items:flex-start;gap:8px;}
+    .baw{background:var(--warn-lt);color:#92400e;}
+    .bao{background:var(--ok-lt);color:#065f46;}
+    .ban{background:var(--danger-lt);color:#991b1b;}
+    .bart{background:var(--purple-lt);color:#5b21b6;}
+    .bar{background:var(--blue-lt);color:#1e40af;}
+    [data-dark="true"] .baw{color:var(--warn);}
+    [data-dark="true"] .bao{color:var(--ok);}
+    [data-dark="true"] .ban{color:var(--danger);}
+    [data-dark="true"] .bart{color:#a78bfa;}
+    [data-dark="true"] .bar{color:#93c5fd;}
+
+    /* Filter */
+    .frow{display:flex;gap:6px;margin-bottom:11px;flex-wrap:wrap;}
+    .fbtn{padding:6px 12px;border-radius:100px;border:1.5px solid var(--border);background:var(--surface);font-family:var(--font);font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all var(--t);min-height:36px;}
+    .fbtn.active{border-color:var(--primary);background:var(--pri-lt);color:var(--primary);}
+
+    /* PJ Dropdown */
+    .dd-wrap{position:relative;}
+    .dropdown{position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1.5px solid var(--primary);border-top:none;border-radius:0 0 var(--r-sm) var(--r-sm);max-height:200px;overflow-y:auto;z-index:50;box-shadow:var(--shadow);}
+    .dd-opt{padding:10px 13px;font-size:14px;cursor:pointer;transition:background var(--t);}
+    .dd-opt:hover{background:var(--pri-lt);color:var(--primary);}
+    .dd-grp{padding:7px 13px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;background:var(--surface2);cursor:default;}
+
+    /* Empty state */
+    .empty{text-align:center;padding:40px 20px;color:var(--text2);}
+    .empty svg{width:60px;height:60px;opacity:.25;margin-bottom:12px;}
+    .empty p{font-size:14px;line-height:1.6;}
+
+    /* Toast */
+    #toast-wrap{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:7px;align-items:center;pointer-events:none;width:90%;max-width:380px;}
+    .toast{background:var(--text);color:var(--bg);padding:11px 18px;border-radius:var(--r-sm);font-size:13px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.22);animation:tIn .3s cubic-bezier(.34,1.56,.64,1);pointer-events:auto;width:100%;text-align:center;}
+    .toast.out{animation:tOut .3s ease forwards;}
+    .toast.ok{background:var(--ok);color:#fff;}
+    .toast.err{background:var(--danger);color:#fff;}
+    @keyframes tIn{from{opacity:0;transform:translateY(20px) scale(.9)}to{opacity:1;transform:none}}
+    @keyframes tOut{to{opacity:0;transform:translateY(10px) scale(.95)}}
+
+    /* Modal */
+    #overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);}
+    #overlay.show{display:flex;animation:ovIn .25s ease;}
+    @keyframes ovIn{from{opacity:0}to{opacity:1}}
+    #modal-box{background:var(--surface);border-radius:var(--r) var(--r) 0 0;padding:20px;width:100%;max-width:520px;max-height:85vh;overflow-y:auto;animation:mIn .3s cubic-bezier(.34,1.2,.64,1);}
+    @keyframes mIn{from{transform:translateY(100%)}to{transform:none}}
+    .modal-title{font-size:16px;font-weight:700;margin-bottom:16px;}
+    .modal-acts{display:flex;gap:8px;margin-top:16px;}
+
+    /* Lightbox */
+    #lbx{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:600;display:none;align-items:center;justify-content:center;cursor:zoom-out;}
+    #lbx.show{display:flex;}
+    #lbx img{max-width:95vw;max-height:95vh;object-fit:contain;border-radius:8px;}
+
+    /* Pagination */
+    .pg-btn{width:100%;padding:12px;text-align:center;cursor:pointer;border:1.5px dashed var(--border);border-radius:var(--r-sm);color:var(--text2);background:none;font-family:var(--font);font-size:13px;font-weight:600;transition:all var(--t);margin-top:6px;}
+    .pg-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--pri-lt);}
+
+    /* Spinner */
+    .spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;}
+    @keyframes sp{to{transform:rotate(360deg)}}
+
+    /* Misc */
+    .divider{height:1px;background:var(--border);margin:14px 0;}
+    ::-webkit-scrollbar{width:4px;height:4px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+    /* ─── RESPONSIVE (Tablet & Desktop) ────────────────────── */
+    @media (min-width: 768px) {
+      body {
+        background: var(--bg);
+        padding: 0;
+      }
+      #app {
+        max-width: 960px;
+        min-height: 100vh;
+        background: var(--bg);
+        border-left: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+        box-shadow: var(--shadow);
+      }
+      #hdr {
+        padding: 12px 24px;
+      }
+      #hdr-title h1 {
+        font-size: 18px;
+      }
+      #tabs {
+        flex-wrap: wrap;
+        overflow-x: visible;
+        padding: 0 16px;
+        gap: 6px;
+      }
+      .tab-btn {
+        font-size: 14px;
+        padding: 12px 18px;
+        border-radius: var(--r-sm) var(--r-sm) 0 0;
+      }
+      .tab-btn:hover {
+        background: var(--surface2);
+      }
+      .tab-btn.active {
+        font-weight: 700;
+        background: var(--pri-lt);
+        border-bottom: 3px solid var(--primary);
+      }
+      #main {
+        padding: 24px;
+      }
+
+      /* Desktop Form Grid */
+      .desktop-form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.25fr;
+        gap: 18px;
+        align-items: start;
+      }
+      .desktop-form-grid .card {
+        margin-bottom: 0;
+        height: 100%;
+      }
+
+      /* Desktop Settings Grid */
+      .desktop-settings-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        align-items: start;
+      }
+      .desktop-settings-grid .card {
+        margin-bottom: 0;
+      }
+      .desktop-settings-full {
+        grid-column: 1 / -1;
+      }
+
+      /* PJ Grid */
+      .pj-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 12px;
+      }
+      .pj-grid .pj-row {
+        margin-bottom: 0;
+      }
+
+      /* Active Borrowed Items Desktop Grid */
+      .active-items-scroll {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 10px;
+        max-height: 280px;
+      }
+
+      /* Stats */
+      .stats {
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 12px;
+      }
+      .stats-4 {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      /* Request Cards */
+      .req {
+        padding: 18px 20px;
+        margin-bottom: 14px;
+      }
+      .req-head {
+        align-items: center;
+      }
+      .rname {
+        font-size: 16px;
+      }
+      .rmeta {
+        font-size: 13px;
+      }
+      .rthumb {
+        width: 56px;
+        height: 56px;
+      }
+
+      /* Centered Modal on Desktop */
+      #overlay {
+        align-items: center;
+        padding: 20px;
+      }
+      #modal-box {
+        border-radius: var(--r);
+        max-width: 580px;
+        animation: mInDesk .25s cubic-bezier(.34, 1.2, .64, 1);
+      }
+      @keyframes mInDesk {
+        from { opacity: 0; transform: scale(.95); }
+        to { opacity: 1; transform: scale(1); }
+      }
+    }
+
+    @media (min-width: 1140px) {
+      #app {
+        max-width: 1120px;
+      }
+      .desktop-form-grid {
+        grid-template-columns: 1fr 1.35fr;
+      }
+    }
+
+    /* ─── DESKTOP vs MOBILE VIEW MODE (RESPONSIF) ────────────── */
+    .btn-hdr-viewmode {
+      display: none;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 9px;
+    }
+    .view-mode-pill-toggle {
+      display: inline-flex;
+      background: var(--surface2);
+      border-radius: var(--r-sm);
+      padding: 3px;
+      gap: 4px;
+      border: 1px solid var(--border);
+    }
+    .btn-vm-opt {
+      padding: 6px 12px;
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      border-radius: var(--r-xs);
+      color: var(--text2);
+      cursor: pointer;
+      transition: all var(--t);
+    }
+    .btn-vm-opt.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(99, 102, 241, 0.35);
+    }
+
+    @media (min-width: 768px) {
+      .btn-hdr-viewmode {
+        display: inline-flex;
+      }
+
+      /* Ketika Mode Tampilan HP aktif pada layar Desktop/Laptop */
+      html[data-view-mode="mobile"] body,
+      body[data-view-mode="mobile"] {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, var(--bg) 100%) !important;
+        padding: 24px 12px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        min-height: 100vh !important;
+      }
+      [data-dark="true"][data-view-mode="mobile"] body,
+      [data-dark="true"] body[data-view-mode="mobile"] {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, #080711 100%) !important;
+      }
+
+      html[data-view-mode="mobile"] #app,
+      body[data-view-mode="mobile"] #app {
+        max-width: 440px !important;
+        width: 100% !important;
+        min-height: calc(100vh - 48px) !important;
+        margin: 0 auto !important;
+        border-radius: 28px !important;
+        border: 2px solid var(--border) !important;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(99, 102, 241, 0.15) !important;
+        overflow-x: hidden !important;
+        background: var(--surface) !important;
+        transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.3s ease;
+      }
+
+      body[data-view-mode="mobile"] #hdr {
+        padding: 10px 14px !important;
+        border-radius: 26px 26px 0 0 !important;
+      }
+      body[data-view-mode="mobile"] #hdr-title h1 {
+        font-size: 15px !important;
+      }
+      body[data-view-mode="mobile"] #tabs {
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        padding: 0 !important;
+        gap: 0 !important;
+        scrollbar-width: none;
+      }
+      body[data-view-mode="mobile"] #tabs::-webkit-scrollbar {
+        display: none;
+      }
+      body[data-view-mode="mobile"] .tab-btn {
+        flex: 0 0 auto !important;
+        font-size: 13px !important;
+        padding: 10px 14px !important;
+        border-radius: 0 !important;
+        background: none !important;
+        border-bottom: 2.5px solid transparent !important;
+      }
+      body[data-view-mode="mobile"] .tab-btn.active {
+        color: var(--primary) !important;
+        border-bottom-color: var(--primary) !important;
+        font-weight: 600 !important;
+      }
+      body[data-view-mode="mobile"] #main {
+        padding: 14px !important;
+      }
+      body[data-view-mode="mobile"] .desktop-form-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+      body[data-view-mode="mobile"] .desktop-settings-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+      body[data-view-mode="mobile"] .pj-grid {
+        grid-template-columns: 1fr !important;
+      }
+      body[data-view-mode="mobile"] .active-items-scroll {
+        display: flex !important;
+        flex-direction: column !important;
+        max-height: 220px !important;
+      }
+      body[data-view-mode="mobile"] .stats {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+      body[data-view-mode="mobile"] .stats-4 {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+      body[data-view-mode="mobile"] .req {
+        padding: 13px !important;
+        margin-bottom: 10px !important;
+      }
+      body[data-view-mode="mobile"] .rname {
+        font-size: 14px !important;
+      }
+    }
+
+    /* ─── LIVE SYNC & AUTO NOTIFICATION (RESPONSIF HP & DESKTOP) ─── */
+    .sync-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      border-radius: 99px;
+      font-size: 10px;
+      font-weight: 600;
+      background: var(--ok-lt);
+      color: #065f46;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      transition: all var(--t);
+      vertical-align: middle;
+    }
+    .sync-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      animation: syncPulse 2s infinite ease-in-out;
+    }
+    @keyframes syncPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.85); }
+    }
+    [data-dark="true"] .sync-badge {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+    .sync-badge.offline {
+      background: var(--warn-lt);
+      color: #92400e;
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+    .sync-badge.offline .sync-dot {
+      background: #f59e0b;
+      animation: none;
+    }
+
+    /* In-App Floating Notification Banner */
+    #auto-notif-container {
+      position: fixed;
+      top: max(12px, env(safe-area-inset-top));
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 24px);
+      max-width: 480px;
+      z-index: 10000;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .auto-notif-card {
+      pointer-events: auto;
+      background: rgba(26, 24, 48, 0.95);
+      color: #f0eeff;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1.5px solid rgba(99, 102, 241, 0.4);
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      animation: notifSlideDown 0.36s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+      position: relative;
+      overflow: hidden;
+      touch-action: pan-y;
+      cursor: pointer;
+    }
+    :root:not([data-dark="true"]) .auto-notif-card {
+      background: rgba(255, 255, 255, 0.98);
+      color: #1a1830;
+      border-color: rgba(99, 102, 241, 0.35);
+      box-shadow: 0 12px 36px rgba(99, 102, 241, 0.22), 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+    .auto-notif-card.closing {
+      animation: notifSlideUp 0.28s cubic-bezier(0.4, 0, 1, 1) forwards;
+    }
+    @keyframes notifSlideDown {
+      from { opacity: 0; transform: translateY(-30px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes notifSlideUp {
+      from { opacity: 1; transform: translateY(0) scale(1); }
+      to { opacity: 0; transform: translateY(-28px) scale(0.95); }
+    }
+    .notif-badge-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+      flex-shrink: 0;
+      background: var(--pri-lt);
+      position: relative;
+    }
+    .notif-badge-icon::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      border: 2px solid var(--surface);
+      box-shadow: 0 0 8px #10b981;
+      animation: syncPulse 1.5s infinite;
+    }
+    .notif-badge-icon.return { background: var(--purple-lt); }
+    .notif-badge-icon.return::after { background: #8b5cf6; box-shadow: 0 0 8px #8b5cf6; }
+    .notif-badge-icon.ok { background: var(--ok-lt); }
+    .notif-badge-icon.ok::after { background: #10b981; }
+    .notif-badge-icon.no { background: var(--danger-lt); }
+    .notif-badge-icon.no::after { background: #ef4444; }
+
+    .notif-body-wrap {
+      flex: 1;
+      min-width: 0;
+    }
+    .notif-header-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 2px;
+    }
+    .notif-title {
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+    .notif-time {
+      font-size: 10px;
+      color: var(--text2);
+      white-space: nowrap;
+      font-weight: 500;
+    }
+    .notif-msg {
+      font-size: 12px;
+      color: var(--text);
+      line-height: 1.35;
+      margin-bottom: 7px;
+    }
+    :root:not([data-dark="true"]) .notif-msg { color: #373455; }
+    .notif-action-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .notif-act-btn {
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 6px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all var(--t);
+    }
+    .notif-act-btn:hover {
+      background: var(--pri-dk);
+      transform: translateY(-1px);
+    }
+    .notif-close-btn {
+      background: none;
+      border: none;
+      color: var(--text2);
+      font-size: 16px;
+      cursor: pointer;
+      padding: 4px 6px;
+      line-height: 1;
+      border-radius: 4px;
+      margin-left: -4px;
+    }
+    .notif-close-btn:hover {
+      color: var(--danger);
+    }
+    .notif-progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--purple));
+      width: 100%;
+      transform-origin: left;
+      animation: notifProgress 6s linear forwards;
+    }
+    @keyframes notifProgress {
+      from { transform: scaleX(1); }
+      to { transform: scaleX(0); }
+    }
+
+    /* Notification Permission Request Banner */
+    #notif-permission-banner {
+      background: linear-gradient(135deg, var(--pri-lt), var(--surface));
+      border: 1.5px solid var(--primary);
+      border-radius: var(--r-sm);
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: var(--shadow-sm);
+      animation: fadeIn .3s ease;
+    }
+    .np-content {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+    .np-icon {
+      font-size: 22px;
+      flex-shrink: 0;
+      animation: bellRing 3s ease infinite;
+    }
+    @keyframes bellRing {
+      0%, 80%, 100% { transform: rotate(0); }
+      85% { transform: rotate(15deg); }
+      90% { transform: rotate(-15deg); }
+      95% { transform: rotate(10deg); }
+    }
+    .np-text strong {
+      display: block;
+      font-size: 13px;
+      color: var(--text);
+    }
+    .np-text small {
+      display: block;
+      font-size: 11px;
+      color: var(--text2);
+      line-height: 1.25;
+      margin-top: 1px;
+    }
+    .np-acts {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .btn-close-np {
+      background: none;
+      border: none;
+      color: var(--text2);
+      font-size: 16px;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+      line-height: 1;
+    }
+    .btn-close-np:hover {
+      color: var(--danger);
+    }
+    .period-btn-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    @media (max-width: 440px) {
+      .period-btn-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* ─── DESKTOP & MOBILE INTEGRATION & SYNC STYLES ─── */
+    .hist-filter-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .hist-filter-tabs {
+      display: inline-flex;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 3px;
+      gap: 3px;
+    }
+    .hft-btn {
+      border: none;
+      background: transparent;
+      color: var(--text2);
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: var(--r-xs);
+      cursor: pointer;
+      transition: all var(--t);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hft-btn.active {
+      background: var(--surface);
+      color: var(--primary);
+      font-weight: 600;
+      box-shadow: var(--shadow-sm);
+    }
+    .device-badge-hp {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: var(--blue-lt);
+      color: var(--blue);
+      font-size: 10px;
+      font-weight: 600;
+      border: 1px solid rgba(59,130,246,0.2);
+    }
+    .device-badge-local {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: var(--pri-lt);
+      color: var(--primary);
+      font-size: 10px;
+      font-weight: 600;
+      border: 1px solid rgba(99,102,241,0.2);
+    }
+    .pending-borrow-card {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(99, 102, 241, 0.08) 100%);
+      border: 1.5px solid var(--warn);
+      border-radius: var(--r);
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15);
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes pulseSoft {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.12); opacity: 0.85; }
+    }
+    .pulse-icon {
+      animation: pulseSoft 1.8s infinite ease-in-out;
+      display: inline-block;
+    }
+    .hp-connect-modal-box {
+      text-align: center;
+      padding: 4px 0;
+    }
+    .hp-qr-wrap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      background: #ffffff;
+      border: 2px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      margin: 12px auto;
+      max-width: 220px;
+      max-height: 220px;
+      overflow: hidden;
+    }
+    .hp-qr-wrap canvas, .hp-qr-wrap img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+    .hp-url-pill {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin: 8px 0;
+      font-family: monospace;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      word-break: break-all;
+    }
+    .btn-hdr-hp {
+      display: inline-flex;
+      position: relative;
+    }
+    .btn-hdr-hp .hdr-hp-pulse {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ok);
+      box-shadow: 0 0 6px var(--ok);
+    }
+  </style>
+</head>
+<body>
+<!-- AUTO NOTIFICATION CONTAINER (RESPONSIF HP & DESKTOP) -->
+<div id="auto-notif-container" aria-live="polite"></div>
+
+<!-- ═══ LOGIN ══════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-logo" id="login-logo-box">
+    <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+  </div>
+  <div class="login-org" id="login-org">BalikinGo</div>
+  <div class="login-sub">Sistem Peminjaman Alat Broadcasting &amp; Perfilman</div>
+  <div class="login-tabs">
+    <button class="login-tab active" id="ltab-borrower" onclick="switchLTab('borrower')">Peminjam</button>
+    <button class="login-tab" id="ltab-officer" onclick="switchLTab('officer')">Petugas</button>
+  </div>
+  <div class="login-box">
+    <div id="lp-borrower">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px;">Ajukan dan pantau peminjaman alat dari HP Anda, tanpa perlu login.</p>
+      <button class="btn btn-pri btn-full" onclick="enterBorrower()">Mulai sebagai Peminjam →</button>
+    </div>
+    <div id="lp-officer" class="hidden">
+      <div class="fg">
+        <label class="fl">Username</label>
+        <input class="fi" id="l-user" type="text" placeholder="admin" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter') doLogin()">
+      </div>
+      <div class="fg">
+        <label class="fl">Password</label>
+        <div style="position:relative;display:flex;align-items:center;">
+          <input class="fi" id="l-pass" type="password" placeholder="••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()" style="padding-right:44px;">
+          <button type="button" onclick="togglePassVis()" style="position:absolute;right:8px;background:none;border:none;color:var(--text2);cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center;" title="Lihat password" aria-label="Toggle password">
+            <svg id="eye-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div id="l-err" class="hidden" style="color:var(--danger);font-size:12px;margin-bottom:12px;background:var(--danger-lt);padding:9px 12px;border-radius:8px;line-height:1.4;"></div>
+      <button class="btn btn-pri btn-full" id="l-btn" onclick="doLogin()">Masuk sebagai Petugas</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ APP ════════════════════════════════════════════ -->
+<div id="app" class="hidden">
+  <header id="hdr">
+    <div id="hdr-logo-ph"><svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div>
+    <img id="hdr-logo" class="hidden" alt="logo">
+    <div id="hdr-title">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <h1 id="hdr-org">BalikinGo</h1>
+        <span id="sync-live-badge" class="sync-badge" title="Status Sinkronisasi &amp; Notifikasi">
+          <span class="sync-dot"></span><span id="sync-live-text">Live</span>
+        </span>
+      </div>
+      <small id="hdr-role">Peminjam</small>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button class="btn btn-icon btn-hdr-hp" id="btn-show-hp" onclick="openHpConnectModal()" title="Hubungkan HP (QR Code &amp; Alamat Wi-Fi)" aria-label="Hubungkan HP">
+        <span style="font-size:15px;">📱</span>
+        <span class="hdr-hp-pulse" title="Server Sinkronisasi Aktif"></span>
+      </button>
+      <button class="btn btn-icon btn-hdr-viewmode" id="hdr-vm-btn" onclick="toggleViewMode()" title="Ganti Mode Tampilan (Desktop / HP)" aria-label="Ganti mode tampilan">
+        <span id="hdr-vm-icon">💻</span>
+      </button>
+      <button class="btn btn-icon" id="home-btn" onclick="goToLanding()" title="Halaman Awal (Landing Page)" aria-label="Home">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      </button>
+      <button class="btn btn-icon hidden" id="hdr-dash-btn" onclick="showTab('dash')" title="Dashboard Petugas" aria-label="Dashboard">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+      </button>
+      <button class="btn btn-icon" onclick="toggleDark()" title="Mode Gelap" aria-label="Toggle dark mode">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
+      </button>
+      <button class="btn btn-icon hidden" id="logout-btn" onclick="doLogout()" title="Logout" aria-label="Logout">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <nav id="tabs">
+    <button class="tab-btn hidden" data-tab="dash"     id="tab-dash"     onclick="showTab('dash')">🛡 Dashboard</button>
+    <button class="tab-btn active" data-tab="form"     id="tab-form"     onclick="showTab('form')">📋 Peminjaman</button>
+    <button class="tab-btn"        data-tab="return"   id="tab-return"   onclick="showTab('return')">🔄 Pengembalian</button>
+    <button class="tab-btn"        data-tab="history"  id="tab-history"  onclick="showTab('history')">📄 Riwayat</button>
+    <button class="tab-btn hidden" data-tab="pj"       id="tab-pj"       onclick="showTab('pj')">👥 PJ</button>
+    <button class="tab-btn hidden" data-tab="settings" id="tab-settings" onclick="showTab('settings')">⚙️ Pengaturan</button>
+  </nav>
+
+  <main id="main">
+
+    <!-- NOTIF PERMISSION BANNER (HP & DESKTOP) -->
+    <div id="notif-permission-banner" class="hidden">
+      <div class="np-content">
+        <span class="np-icon">🔔</span>
+        <div class="np-text">
+          <strong>Aktifkan Notifikasi di HP</strong>
+          <small>Dapatkan pemberitahuan otomatis saat barang dipinjam &amp; dikembalikan</small>
+        </div>
+      </div>
+      <div class="np-acts">
+        <button class="btn btn-pri btn-sm" onclick="requestNotifPermission()">Aktifkan</button>
+        <button class="btn-close-np" onclick="dismissNotifBanner()" aria-label="Tutup">✕</button>
+      </div>
+    </div>
+
+    <!-- FORM -->
+    <div class="view active" id="view-form">
+      <!-- WIDGET BARANG SEDANG DIPINJAM / BELUM DIKEMBALIKAN -->
+      <div id="active-borrowed-wrap"></div>
+
+      <div class="desktop-form-grid">
+        <div class="card">
+          <div class="card-title">🎬 Data Peminjaman</div>
+          <div class="fg">
+            <label class="fl">Penanggung Jawab *</label>
+            <div class="dd-wrap">
+              <input class="fi" id="pj-search" placeholder="Cari penanggung jawab..." autocomplete="off" oninput="filterPJ(this.value)" onfocus="showDD()" onblur="hideDD()">
+              <div class="dropdown hidden" id="pj-dd"></div>
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">Nama Peminjam *</label>
+            <div class="irow-row" id="borrower-input-row">
+              <div id="borrower-ph-slot"></div>
+              <input class="fi item-name-fi" id="f-nama" type="text" placeholder="Nama lengkap peminjam *" data-m="nama">
+            </div>
+          </div>
+          <div class="fg"><label class="fl">Tanggal Pinjam *</label><input class="fi" id="f-tgl" type="date" data-m="tgl"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">📦 Daftar Barang yang Dipinjam</div>
+          <div id="items-list"></div>
+          <button class="btn btn-ghost btn-full" onclick="addItem()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Tambah Barang
+          </button>
+        </div>
+      </div>
+      <button class="btn btn-pri btn-full" onclick="submitForm()" style="margin-top:16px;margin-bottom:24px;font-size:15px;padding:13px;">✉️ Kirim Pengajuan Peminjaman</button>
+    </div>
+
+    <!-- PENGEMBALIAN -->
+    <div class="view" id="view-return">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div style="font-size:14px;font-weight:700;">🔄 Pengembalian Alat</div>
+        <button class="btn btn-ghost btn-sm" onclick="exportReturnExcel()">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+          Ekspor Excel
+        </button>
+      </div>
+      <div class="stats" id="return-stats"></div>
+      <div class="sw">
+        <span class="si"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></span>
+        <input class="fi sfi" id="return-search" type="search" placeholder="Cari peminjam, barang, PJ..." oninput="renderReturn()">
+      </div>
+      <div class="frow" id="return-filter-row">
+        <button class="fbtn active" data-rf="all"       onclick="setReturnF('all',this)">Semua</button>
+        <button class="fbtn"        data-rf="ok"        onclick="setReturnF('ok',this)">⏳ Sedang Dipinjam</button>
+        <button class="fbtn"        data-rf="returning" onclick="setReturnF('returning',this)">🔄 Menunggu Konfirmasi</button>
+        <button class="fbtn"        data-rf="returned"  onclick="setReturnF('returned',this)">📦 Selesai</button>
+      </div>
+      <div id="return-list"></div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="view" id="view-history">
+      <div class="hist-filter-bar">
+        <div class="hist-filter-tabs">
+          <button type="button" class="hft-btn active" id="hft-all" onclick="setHistFilter('all')">🌐 Semua Peminjaman</button>
+          <button type="button" class="hft-btn" id="hft-mine" onclick="setHistFilter('mine')">📱 Perangkat Ini</button>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="exportHistExcel()">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+          Ekspor Excel
+        </button>
+      </div>
+      <div class="frow" style="margin-bottom:12px;">
+        <button class="fbtn active" data-hf="all"       onclick="setHistStatusF('all',this)">Semua Status</button>
+        <button class="fbtn"        data-hf="wait"      onclick="setHistStatusF('wait',this)">⏳ Menunggu</button>
+        <button class="fbtn"        data-hf="ok"        onclick="setHistStatusF('ok',this)">✅ Disetujui</button>
+        <button class="fbtn"        data-hf="returning" onclick="setHistStatusF('returning',this)">🔄 Pengembalian</button>
+        <button class="fbtn"        data-hf="returned"  onclick="setHistStatusF('returned',this)">📦 Selesai</button>
+        <button class="fbtn"        data-hf="no"        onclick="setHistStatusF('no',this)">❌ Ditolak</button>
+      </div>
+      <div id="hist-banner"></div>
+      <div class="stats" id="hist-stats"></div>
+      <div id="hist-list"></div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="view" id="view-dash">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+        <button class="btn btn-ghost btn-sm" onclick="exportDashExcel()">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          Ekspor Excel
+        </button>
+      </div>
+      <div class="stats" id="dash-stats"></div>
+      <div class="sw">
+        <span class="si"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></span>
+        <input class="fi sfi" id="dash-search" type="search" placeholder="Cari peminjam, barang, PJ..." oninput="renderDash()">
+      </div>
+      <div class="frow">
+        <button class="fbtn active" data-f="all"       onclick="setDashF('all',this)">Semua</button>
+        <button class="fbtn"        data-f="wait"      onclick="setDashF('wait',this)">⏳ Menunggu</button>
+        <button class="fbtn"        data-f="ok"        onclick="setDashF('ok',this)">✅ Disetujui</button>
+        <button class="fbtn"        data-f="no"        onclick="setDashF('no',this)">❌ Ditolak</button>
+        <button class="fbtn"        data-f="returning" onclick="setDashF('returning',this)">🔄 Dikembalikan</button>
+        <button class="fbtn"        data-f="returned"  onclick="setDashF('returned',this)">📦 Selesai</button>
+      </div>
+      <div id="dash-list"></div>
+    </div>
+
+    <!-- PJ -->
+    <div class="view" id="view-pj">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+        <button class="btn btn-pri btn-sm" onclick="openPJModal()">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Tambah PJ
+        </button>
+        <label class="btn btn-ghost btn-sm" style="cursor:pointer;">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/></svg>
+          Impor XLSX<input type="file" accept=".xlsx,.xls,.csv" onchange="importPJ(event)" style="display:none">
+        </label>
+        <button class="btn btn-ghost btn-sm" onclick="dlTemplate()">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>Template
+        </button>
+      </div>
+      <!-- PJ Search -->
+      <div class="sw" style="margin-bottom:12px;">
+        <span class="si"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></span>
+        <input class="fi sfi" id="pj-search-list" type="search" placeholder="Cari nama atau divisi..." oninput="renderPJ()">
+      </div>
+      <div id="pj-list"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="view" id="view-settings">
+      <!-- Banner Notifikasi Jika Dibuka oleh Peminjam -->
+      <div id="settings-peminjam-banner" class="banner baw hidden" style="align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:24px;">ℹ️</span>
+          <div>
+            <div style="font-weight:700;font-size:14px;">Mode Peminjam</div>
+            <div style="font-size:12px;opacity:.9;margin-top:2px;">Anda dapat mengatur mode tampilan gelap di bawah. Untuk mengubah nama organisasi, logo, atau backup data, silakan masuk sebagai Petugas.</div>
+          </div>
+        </div>
+        <button class="btn btn-pri btn-sm" onclick="goToLandingPetugas()" style="white-space:nowrap;">🔑 Masuk Petugas</button>
+      </div>
+
+      <div class="desktop-settings-grid">
+        <div class="card" id="card-branding">
+          <div class="card-title">🏢 Branding Organisasi</div>
+          <div class="fg"><label class="fl">Nama Organisasi</label><input class="fi" id="s-org" type="text" placeholder="Nama organisasi..."></div>
+          <div class="fg">
+            <label class="fl">Logo</label>
+            <div style="display:flex;gap:12px;align-items:center;">
+              <div id="logo-prev"></div>
+              <div style="display:flex;flex-direction:column;gap:6px;" id="logo-actions">
+                <label class="btn btn-ghost btn-sm" id="btn-upload-logo-wrap" style="cursor:pointer;">📂 Unggah Logo<input type="file" id="fi-logo-input" accept="image/*" onchange="uploadLogo(event)" style="display:none"></label>
+                <button class="btn btn-ghost btn-sm" id="rm-logo-btn" onclick="removeLogo()" style="display:none;color:var(--danger)">🗑 Hapus Logo</button>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-pri" id="btn-save-settings" onclick="saveSettings()">💾 Simpan Pengaturan</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🎨 Tampilan &amp; Aplikasi</div>
+          <div class="setting-row">
+            <div><div class="sl">Mode Gelap</div><div class="sd">Tema gelap tersimpan otomatis di perangkat</div></div>
+            <button class="toggle" id="dark-tog" onclick="toggleDark()"></button>
+          </div>
+          <div class="setting-row">
+            <div>
+              <div class="sl">Mode Tampilan Layar (Desktop)</div>
+              <div class="sd">Pilih tampilan Desktop Luas atau Simulasi Tampilan HP responsif</div>
+            </div>
+            <div class="view-mode-pill-toggle">
+              <button type="button" class="btn-vm-opt active" id="vm-opt-desktop" onclick="setViewMode('desktop')">💻 Desktop</button>
+              <button type="button" class="btn-vm-opt" id="vm-opt-mobile" onclick="setViewMode('mobile')">📱 HP</button>
+            </div>
+          </div>
+          <div class="setting-row" style="border-bottom:none;">
+            <div><div class="sl">Versi Sistem</div><div class="sd">BalikinGo v2.3 (Auto-Notification &amp; Sync)</div></div>
+            <span class="badge bo">Aktif</span>
+          </div>
+        </div>
+
+        <div class="card" id="card-notif-settings">
+          <div class="card-title">🔔 Notifikasi &amp; Suara Otomatis</div>
+          <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">Notifikasi berbunyi dan bergetar otomatis di HP jika ada peminjaman baru atau pengembalian barang.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-pri btn-sm" type="button" onclick="testNotification()">
+              🔊 Uji Suara &amp; Getar di HP
+            </button>
+            <button class="btn btn-ghost btn-sm" type="button" onclick="requestNotifPermission()">
+              🔔 Cek Izin Notifikasi Sistem
+            </button>
+          </div>
+        </div>
+
+        <div class="card" id="card-pdf-report">
+          <div class="card-title">📄 Laporan Peminjaman &amp; Pengembalian (PDF)</div>
+          <p style="font-size:12px;color:var(--text2);margin-bottom:14px;">
+            Cetak &amp; unduh laporan resmi peminjaman dan pengembalian alat dalam format PDF dengan filter periode (Harian, Mingguan, Bulanan) serta tanda tangan Toolman.
+          </p>
+
+          <div class="fg">
+            <label class="fl">Pilih Periode Laporan</label>
+            <div class="period-btn-grid" id="rep-period-btns">
+              <button type="button" class="btn btn-sm btn-pri" id="rbtn-daily" onclick="setRepPeriod('daily')">📅 Harian</button>
+              <button type="button" class="btn btn-sm btn-ghost" id="rbtn-weekly" onclick="setRepPeriod('weekly')">📆 Mingguan</button>
+              <button type="button" class="btn btn-sm btn-ghost" id="rbtn-monthly" onclick="setRepPeriod('monthly')">🗓️ Bulanan</button>
+              <button type="button" class="btn btn-sm btn-ghost" id="rbtn-all" onclick="setRepPeriod('all')">♾️ Semua</button>
+            </div>
+          </div>
+
+          <!-- Periode Harian -->
+          <div class="fg" id="rep-wrap-daily">
+            <label class="fl">Tanggal Laporan (Harian)</label>
+            <input class="fi" id="rep-input-daily" type="date">
+          </div>
+
+          <!-- Periode Mingguan -->
+          <div class="fg hidden" id="rep-wrap-weekly">
+            <label class="fl">Pilih Tanggal Acuan (Rentang 7 Hari)</label>
+            <input class="fi" id="rep-input-weekly" type="date" onchange="updateWeeklyHint()">
+            <small id="rep-weekly-hint" style="color:var(--primary);font-size:11px;font-weight:600;display:block;margin-top:4px;"></small>
+          </div>
+
+          <!-- Periode Bulanan -->
+          <div class="fg hidden" id="rep-wrap-monthly">
+            <label class="fl">Pilih Bulan &amp; Tahun</label>
+            <input class="fi" id="rep-input-monthly" type="month">
+          </div>
+
+          <!-- Filter Status -->
+          <div class="fg">
+            <label class="fl">Filter Status Transaksi</label>
+            <select class="fs" id="rep-status">
+              <option value="all">Semua Status (Dipinjam, Selesai, Menunggu)</option>
+              <option value="returned">Khusus Selesai Dikembalikan (📦 Selesai)</option>
+              <option value="active">Khusus Masih Dipinjam (⏳ Dipinjam / 🔄 Proses)</option>
+              <option value="wait">Khusus Menunggu Persetujuan (⏳ Menunggu)</option>
+            </select>
+          </div>
+
+          <!-- Program Keahlian (Kop Laporan) -->
+          <div class="fg">
+            <label class="fl">Nama Program Keahlian (Kop Laporan) *</label>
+            <input class="fi" id="rep-prodi" type="text" placeholder="Contoh: Broadcasting dan Perfilman" oninput="saveProdiName(this.value)">
+            <small style="color:var(--text2);font-size:11px;display:block;margin-top:3px;">
+              Dicantumkan pada baris kedua kop laporan PDF: <em>"Laporan Peminjaman dan Pengembalian Alat"</em> &crarr; <em>"[Program Keahlian]"</em>.
+            </small>
+          </div>
+
+          <!-- Nama Toolman -->
+          <div class="fg">
+            <label class="fl">Nama Toolman / Petugas Peralatan *</label>
+            <input class="fi" id="rep-toolman" type="text" placeholder="Contoh: Budi Santoso (Toolman Lab)" oninput="saveToolmanName(this.value)">
+            <small style="color:var(--text2);font-size:11px;display:block;margin-top:3px;">
+              Nama ini dicantumkan di bagian pengesahan bawah laporan PDF: <em>"Mengetahui, Toolman / Petugas Peralatan"</em>.
+            </small>
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+            <button class="btn btn-pri btn-sm" type="button" onclick="generatePdfReport(false)" style="flex:1;min-width:140px;">
+              📥 Unduh Laporan PDF
+            </button>
+            <button class="btn btn-ghost btn-sm" type="button" onclick="generatePdfReport(true)" style="flex:1;min-width:140px;" title="Pratinjau cetak untuk disimpan sebagai PDF langsung">
+              🖨️ Pratinjau &amp; Cetak
+            </button>
+          </div>
+        </div>
+
+        <div class="card" id="card-password">
+          <div class="card-title">👤 Ganti Password Petugas</div>
+          <div class="fg"><label class="fl">Password Baru</label><input class="fi" id="s-np" type="password" placeholder="Min. 6 karakter"></div>
+          <div class="fg"><label class="fl">Konfirmasi Password</label><input class="fi" id="s-cp" type="password" placeholder="Ulangi password"></div>
+          <button class="btn btn-ghost" id="btn-change-pass" onclick="changePass()">🔑 Ganti Password</button>
+        </div>
+
+        <div class="card" id="card-backup">
+          <div class="card-title">💾 Backup &amp; Restore Data</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-sm" id="btn-export-json" onclick="exportData()">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>Ekspor JSON
+            </button>
+            <label class="btn btn-ghost btn-sm" id="btn-import-wrap" style="cursor:pointer;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/></svg>
+              Impor JSON<input type="file" id="fi-import-input" accept=".json" onchange="importData(event)" style="display:none">
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL -->
+<div id="overlay" onclick="closeModalEv(event)">
+  <div id="modal-box">
+    <div class="modal-title" id="m-title"></div>
+    <div id="m-body"></div>
+    <div class="modal-acts" id="m-acts"></div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lbx" onclick="closeLbx()"><img id="lbx-img" src="" alt="foto"></div>
+
+<!-- TOASTS -->
+<div id="toast-wrap"></div>
+
+<!-- Hidden inputs -->
+<input type="file" id="fi-photo" accept="image/*" capture="environment" style="display:none" onchange="onPhoto(event)">
+<input type="file" id="fi-photo-user" accept="image/*" capture="user" style="display:none" onchange="onPhotoUser(event)">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="vendor/jspdf.umd.min.js"></script>
+<script src="vendor/jspdf.plugin.autotable.min.js"></script>
+<script src="vendor/qrcode.min.js"></script>
+<script>
+'use strict';
+/* ─── STATE ────────────────────────────────────────────── */
+const S = {
+  tab:'form', dashF:'all', returnF:'all', isAdmin:false,
+  photoTarget:null, pjModalId:null, ddFilter:'',
+  d:{ nama:'', tgl:'', pjId:'', pjN:'', pjD:'', items:[], phUser:'' }
+};
+let histPage = 1, dashPage = 1, returnPage = 1;
+const PAGE = 8;
+
+/* ─── CLIENT IDENTIFIER & REALTIME SYNC ──────────────────── */
+const CLIENT_ID = 'cli_' + Math.random().toString(36).slice(2, 9);
+let lastServerVersion = 0;
+let lastSeenEventId = 0;
+const BC = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('pinjam_channel') : null;
+if (BC) {
+  BC.onmessage = (ev) => {
+    if (ev.data === 'sync') syncCheck();
+  };
+}
+
+/* ─── DB ────────────────────────────────────────────────── */
+const DB_KEY='pinjam_db', ME_KEY='pinjam_me', SESS_KEY='pinjam_sess';
+const DEFAULT_ADMIN_HASH = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'; // sha256('admin123')
+let db = null;
+
+function defDb() {
+  return {
+    v: 2,
+    settings: { org: 'BalikinGo', logo: '', dark: false },
+    pj: [],
+    reqs: [],
+    logs: [],
+    users: [
+      { u: 'admin', h: DEFAULT_ADMIN_HASH }
+    ]
+  };
+}
+
+async function load() {
+  let loadedFromServer = false;
+  try {
+    const res = await fetch('/api/db', { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.reqs && !data.empty) {
+        db = data;
+        if (data.v) lastServerVersion = data.v;
+        localStorage.setItem(DB_KEY, JSON.stringify(db));
+        loadedFromServer = true;
+        setSyncLiveStatus(true);
+      }
+    }
+  } catch(e) {}
+
+  if (!loadedFromServer) {
+    const raw = localStorage.getItem(DB_KEY);
+    if (raw) {
+      db = JSON.parse(raw);
+    } else {
+      db = defDb();
+    }
+    syncPushDb();
+  }
+
+  // Ensure all keys exist
+  if (!db.settings) db.settings = { org:'BalikinGo', logo:'', dark:false };
+  if (!db.users || !db.users.length) {
+    db.users = [{ u: 'admin', h: DEFAULT_ADMIN_HASH }];
+  }
+  if (!db.logs)     db.logs = [];
+  if (!db.pj)       db.pj = [];
+  if (!db.reqs)     db.reqs = [];
+  // ── MIGRATION v1 → v2: add return fields ──
+  if (!db.v || db.v < 2) {
+    db.reqs.forEach(r => {
+      if (r.retNote === undefined) r.retNote = '';
+      if (r.retCond === undefined) r.retCond = '';
+      if (r.retPh   === undefined) r.retPh   = '';
+      if (r.retAt   === undefined) r.retAt   = null;
+    });
+    db.v = 2;
+    save();
+  }
+}
+
+function mergeServerDb(serverDb) {
+  if (!serverDb || !serverDb.reqs) return;
+  if (!db) { db = serverDb; return; }
+
+  // Settings
+  if (serverDb.settings) db.settings = Object.assign({}, db.settings, serverDb.settings);
+  if (serverDb.users && serverDb.users.length) db.users = serverDb.users;
+  
+  // PJ
+  if (serverDb.pj && Array.isArray(serverDb.pj)) {
+    const pjMap = new Map();
+    (db.pj || []).forEach(p => pjMap.set(p.id, p));
+    serverDb.pj.forEach(p => pjMap.set(p.id, p));
+    db.pj = Array.from(pjMap.values());
+  }
+
+  // Reqs: gabungkan pengajuan berdasarkan ID unik
+  const reqMap = new Map();
+  (db.reqs || []).forEach(r => reqMap.set(r.id, r));
+  (serverDb.reqs || []).forEach(r => {
+    const local = reqMap.get(r.id);
+    if (!local) {
+      reqMap.set(r.id, r);
+    } else {
+      // Prioritaskan status terbaru dari server atau update yang lebih baru
+      reqMap.set(r.id, Object.assign({}, local, r));
+    }
+  });
+  db.reqs = Array.from(reqMap.values());
+
+  // Logs
+  const logMap = new Map();
+  (db.logs || []).forEach(l => logMap.set(l.id, l));
+  (serverDb.logs || []).forEach(l => logMap.set(l.id, l));
+  db.logs = Array.from(logMap.values());
+}
+
+async function save() {
+  localStorage.setItem(DB_KEY, JSON.stringify(db));
+  try { if (BC) BC.postMessage('sync'); } catch(e) {}
+  await syncPushDb();
+}
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+/* ─── WEB AUDIO API SYNTHESIZER (NO EXTERNAL FILES, WORKS OFFLINE) ─── */
+const AudioNotif = {
+  ctx: null,
+  init() {
+    if (!this.ctx && (window.AudioContext || window.webkitAudioContext)) {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  },
+  play(type) {
+    try {
+      this.init();
+      if (!this.ctx) return;
+      const t = this.ctx.currentTime;
+      if (type === 'loan_new') {
+        // Nada naik tegas untuk peminjaman baru (F5 -> C6)
+        this.beep(698.46, t, 0.14, 'sine', 0.25);
+        this.beep(1046.50, t + 0.13, 0.32, 'triangle', 0.35);
+      } else if (type === 'return_new') {
+        // Melodi 3-nada khas untuk pengembalian (G5 -> E5 -> C6)
+        this.beep(783.99, t, 0.12, 'sine', 0.25);
+        this.beep(659.25, t + 0.10, 0.12, 'sine', 0.25);
+        this.beep(1046.50, t + 0.20, 0.35, 'triangle', 0.35);
+      } else if (type === 'approved' || type === 'loan_ok' || type === 'return_ok') {
+        // Arpeggio ceria nada C-E-G-C saat disetujui / selesai
+        this.beep(523.25, t, 0.09, 'sine', 0.2);
+        this.beep(659.25, t + 0.08, 0.09, 'sine', 0.25);
+        this.beep(783.99, t + 0.16, 0.11, 'sine', 0.3);
+        this.beep(1046.50, t + 0.25, 0.38, 'triangle', 0.35);
+      } else if (type === 'rejected' || type === 'loan_no' || type === 'return_no') {
+        // Nada peringatan lembut 2-nada (A4 -> E4)
+        this.beep(440, t, 0.14, 'sawtooth', 0.15);
+        this.beep(329.63, t + 0.13, 0.26, 'sawtooth', 0.15);
+      } else {
+        // Soft ding
+        this.beep(880, t, 0.22, 'sine', 0.25);
+      }
+    } catch(e) {}
+  },
+  beep(freq, start, dur, type='sine', gain=0.3) {
+    try {
+      const osc = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, start);
+      g.gain.setValueAtTime(0, start);
+      g.gain.linearRampToValueAtTime(gain, start + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+      osc.connect(g);
+      g.connect(this.ctx.destination);
+      osc.start(start);
+      osc.stop(start + dur);
+    } catch(e) {}
+  }
+};
+
+/* ─── VIBRATION (HP ANDROID FEEDBACK) ─────────────────────── */
+function triggerVibrate(pattern = [180, 80, 180, 80, 200]) {
+  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+    try { navigator.vibrate(pattern); } catch(e) {}
+  }
+}
+
+/* ─── SYSTEM PUSH NOTIFICATION (ANDROID STATUS BAR & DESKTOP) ── */
+function showSystemNotification(title, options = {}) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const notifOpts = {
+    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="%236366f1"/><path d="M22 13h-6v6h6v-6zM21 4v3H11V4H9v3H8C6.34 7 5 8.34 5 10v16c0 1.66 1.34 3 3 3h16c1.66 0 3-1.34 3-3V10c0-1.66-1.34-3-3-3h-1V4h-2zm3 22H8V14h16v12z" fill="white"/></svg>',
+    badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="%236366f1"/></svg>',
+    vibrate: [200, 100, 200],
+    ...options
+  };
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.ready.then(reg => {
+      reg.showNotification(title, notifOpts).catch(() => {
+        try { new Notification(title, notifOpts); } catch(e) {}
+      });
+    }).catch(() => {
+      try { new Notification(title, notifOpts); } catch(e) {}
+    });
+  } else {
+    try { new Notification(title, notifOpts); } catch(e) {}
+  }
+}
+
+/* ─── IN-APP FLOATING NOTIFICATION BANNER (RESPONSIF HP) ─── */
+function showInAppNotification({ icon, type, title, msg, actLabel, actFn, duration = 6500 }) {
+  const container = document.getElementById('auto-notif-container');
+  if (!container) return;
+
+  const card = document.createElement('div');
+  card.className = 'auto-notif-card';
+  card.setAttribute('role', 'alert');
+  const notifId = 'notif-' + uid();
+  card.id = notifId;
+
+  card.innerHTML = `
+    <div class="notif-badge-icon ${type || ''}">${icon || '🔔'}</div>
+    <div class="notif-body-wrap">
+      <div class="notif-header-line">
+        <span class="notif-title">${title}</span>
+        <span class="notif-time">Baru saja</span>
+      </div>
+      <div class="notif-msg">${msg}</div>
+      <div class="notif-action-row">
+        ${actLabel ? `<button class="notif-act-btn" id="act-${notifId}">${actLabel} →</button>` : ''}
+        <button class="notif-close-btn" id="cls-${notifId}" aria-label="Tutup">✕</button>
+      </div>
+    </div>
+    <div class="notif-progress-bar" style="animation-duration:${duration}ms;"></div>
+  `;
+
+  container.appendChild(card);
+
+  // Setup click action button
+  if (actLabel && actFn) {
+    const actBtn = card.querySelector('#act-' + notifId);
+    if (actBtn) {
+      actBtn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        dismissCard(card);
+        actFn();
+      });
+    }
+  }
+
+  // Dismiss button
+  const clsBtn = card.querySelector('#cls-' + notifId);
+  if (clsBtn) {
+    clsBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      dismissCard(card);
+    });
+  }
+
+  // Card click: triggers action if available, else dismiss
+  card.addEventListener('click', () => {
+    if (actFn) actFn();
+    dismissCard(card);
+  });
+
+  // Swipe-up to dismiss on mobile touch screens
+  let touchStartY = 0;
+  card.addEventListener('touchstart', e => {
+    if (e.touches && e.touches[0]) touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  card.addEventListener('touchend', e => {
+    if (e.changedTouches && e.changedTouches[0]) {
+      const diffY = touchStartY - e.changedTouches[0].clientY;
+      if (diffY > 25) dismissCard(card);
+    }
+  }, { passive: true });
+
+  // Auto dismiss timer
+  const timer = setTimeout(() => {
+    dismissCard(card);
+  }, duration);
+
+  function dismissCard(el) {
+    clearTimeout(timer);
+    if (!el || el.classList.contains('closing')) return;
+    el.classList.add('closing');
+    setTimeout(() => {
+      if (el && el.parentNode) el.remove();
+    }, 280);
+  }
+}
+
+/* ─── PERMISSION & TEST NOTIFICATION ─────────────────────── */
+function requestNotifPermission() {
+  AudioNotif.init();
+  if (!('Notification' in window)) {
+    toast('Perangkat/browser ini tidak mendukung notifikasi sistem. Notifikasi suara & banner in-app tetap aktif.', '');
+    dismissNotifBanner();
+    return;
+  }
+  Notification.requestPermission().then(perm => {
+    dismissNotifBanner();
+    if (perm === 'granted') {
+      toast('Notifikasi otomatis HP aktif! 🔔', 'ok');
+      showSystemNotification('BalikinGo — Notifikasi HP Aktif 🔔', {
+        body: 'Anda akan menerima pemberitahuan otomatis saat barang dipinjam atau dikembalikan.'
+      });
+    } else {
+      toast('Izin notifikasi belum diizinkan. Notifikasi suara & banner in-app tetap aktif.', '');
+    }
+  }).catch(() => dismissNotifBanner());
+}
+
+function dismissNotifBanner() {
+  const b = document.getElementById('notif-permission-banner');
+  if (b) b.classList.add('hidden');
+  try { localStorage.setItem('pinjam_notif_banner_dismissed', '1'); } catch(e) {}
+}
+
+function checkNotifPermissionBanner() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    if (localStorage.getItem('pinjam_notif_banner_dismissed') !== '1') {
+      const b = document.getElementById('notif-permission-banner');
+      if (b) b.classList.remove('hidden');
+    }
+  }
+}
+
+function testNotification() {
+  AudioNotif.init();
+  AudioNotif.play('loan_new');
+  triggerVibrate([200, 100, 200, 100, 250]);
+  showInAppNotification({
+    icon: '🔔',
+    type: 'loan',
+    title: 'Uji Notifikasi BalikinGo Berhasil! 🎉',
+    msg: 'Suara chime, getar HP, dan banner responsif berfungsi normal.',
+    actLabel: 'Sip, Bagus!',
+    actFn: () => toast('Notifikasi otomatis berfungsi sempurna! ✅', 'ok')
+  });
+  showSystemNotification('🔔 Uji Notifikasi BalikinGo', {
+    body: 'Notifikasi otomatis di HP berfungsi normal!'
+  });
+  toast('Uji notifikasi dikirim! 🔔', 'ok');
+}
+
+/* ─── REALTIME SINKRONISASI SERVER & NOTIFIKASI ───────────── */
+function setSyncLiveStatus(isLive) {
+  const badge = document.getElementById('sync-live-badge');
+  const txt = document.getElementById('sync-live-text');
+  if (!badge) return;
+  if (isLive) {
+    badge.classList.remove('offline');
+    if (txt) txt.textContent = 'Live';
+    badge.title = 'Terhubung ke server lokal. Notifikasi real-time aktif.';
+  } else {
+    badge.classList.add('offline');
+    if (txt) txt.textContent = 'Lokal';
+    badge.title = 'Bekerja secara lokal (offline).';
+  }
+}
+
+async function syncPushDb() {
+  try {
+    const res = await fetch('/api/db', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(db)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.v) lastServerVersion = data.v;
+      setSyncLiveStatus(true);
+    }
+  } catch(e) {
+    setSyncLiveStatus(false);
+  }
+}
+
+async function syncPullDb(newVersion) {
+  try {
+    const res = await fetch('/api/db', { cache: 'no-store' });
+    if (!res.ok) return;
+    const serverDb = await res.json();
+    if (serverDb && serverDb.reqs && !serverDb.empty) {
+      mergeServerDb(serverDb);
+      localStorage.setItem(DB_KEY, JSON.stringify(db));
+      lastServerVersion = newVersion;
+      
+      // Update semua tampilan yang sedang dibuka di Desktop & HP secara instan
+      if (S.tab === 'dash')     renderDash();
+      if (S.tab === 'return')   renderReturn();
+      if (S.tab === 'history')  renderHist();
+      renderActiveBorrowed();
+      applyBranding();
+      setSyncLiveStatus(true);
+    }
+  } catch(e) {
+    setSyncLiveStatus(false);
+  }
+}
+
+async function notifyServer(payload) {
+  payload.senderId = CLIENT_ID;
+  try {
+    const res = await fetch('/api/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.v) lastServerVersion = data.v;
+      setSyncLiveStatus(true);
+    }
+  } catch(e) {
+    setSyncLiveStatus(false);
+  }
+}
+
+async function checkSync() {
+  try {
+    const res = await fetch(`/api/sync?since=${lastSeenEventId}`, { cache: 'no-store' });
+    if (!res.ok) {
+      setSyncLiveStatus(false);
+      return;
+    }
+    const data = await res.json();
+    setSyncLiveStatus(true);
+
+    // 1. Jika database di server memiliki versi berbeda dari versi lokal
+    if (data.v && data.v !== lastServerVersion) {
+      await syncPullDb(data.v);
+    }
+
+    // 2. Proses event notifikasi baru
+    const events = Array.isArray(data.events) ? data.events : (data.events ? [data.events] : []);
+    if (events.length > 0) {
+      events.forEach(evt => {
+        if (evt.id > lastSeenEventId) {
+          lastSeenEventId = evt.id;
+          handleIncomingNotification(evt);
+        }
+      });
+    }
+  } catch(e) {
+    setSyncLiveStatus(false);
+  }
+}
+
+function handleIncomingNotification(evt) {
+  // Cegah notifikasi ganda jika pengirim adalah perangkat/tab ini sendiri
+  if (evt.senderId && evt.senderId === CLIENT_ID) return;
+
+  const myIds = JSON.parse(localStorage.getItem(ME_KEY) || '[]');
+  const isMyReq = evt.reqId && myIds.includes(evt.reqId);
+  const itemsText = Array.isArray(evt.items) ? evt.items.join(', ') : (evt.items || 'Barang');
+
+  // Segera perbarui tampilan di Desktop / Laptop agar data baru langsung muncul di layar!
+  if (S.tab === 'history') renderHist();
+  if (S.tab === 'dash') renderDash();
+  if (S.tab === 'return') renderReturn();
+  renderActiveBorrowed();
+
+  // 1. Skenario: Peminjaman Baru Masuk (Ditujukan untuk Laptop/Desktop & Petugas)
+  if (evt.type === 'loan_new') {
+    AudioNotif.play('loan_new');
+    triggerVibrate([200, 90, 200, 90, 220]);
+    showInAppNotification({
+      icon: '📋',
+      type: 'loan',
+      title: 'Peminjaman Baru Masuk dari HP!',
+      msg: `<strong>${e(evt.nama)}</strong> meminjam: ${e(itemsText)}`,
+      actLabel: S.isAdmin ? 'Tinjau di Dashboard' : 'Lihat di Riwayat',
+      actFn: () => {
+        if (S.isAdmin) {
+          showTab('dash');
+        } else {
+          setHistFilter('all');
+          showTab('history');
+        }
+      }
+    });
+    showSystemNotification('📋 Peminjaman Baru Masuk', {
+      body: `${evt.nama} mengajukan: ${itemsText}`,
+      tag: 'loan-' + (evt.reqId || Date.now())
+    });
+    toast(`📥 Peminjaman baru dari HP: ${e(evt.nama)} (${e(itemsText)})`, 'ok');
+  }
+
+  // 2. Skenario: Pengembalian Alat Masuk
+  else if (evt.type === 'return_new') {
+    AudioNotif.play('return_new');
+    triggerVibrate([180, 80, 180, 80, 200]);
+    const condLabel = evt.cond === 'ok' ? '✅ Kondisi Baik' : '⚠️ Ada Kerusakan';
+    showInAppNotification({
+      icon: '🔄',
+      type: 'return',
+      title: 'Pengembalian Barang Masuk!',
+      msg: `<strong>${e(evt.nama)}</strong> mengembalikan: ${e(itemsText)} (${condLabel})`,
+      actLabel: S.isAdmin ? 'Konfirmasi Pengembalian' : 'Buka Pengembalian',
+      actFn: () => {
+        showTab('return');
+      }
+    });
+    showSystemNotification('🔄 Pengembalian Alat Masuk', {
+      body: `${evt.nama} mengembalikan: ${itemsText} (${condLabel})`,
+      tag: 'return-' + (evt.reqId || Date.now())
+    });
+    toast(`🔄 Pengembalian masuk dari ${e(evt.nama)}`, 'ok');
+  }
+
+  // 3. Skenario: Status Peminjaman (Disetujui / Ditolak) Ditujukan untuk Peminjam di HP
+  else if (evt.type === 'loan_status') {
+    const isApproved = evt.status === 'ok';
+    const isRejected = evt.status === 'no';
+
+    if (isApproved) {
+      AudioNotif.play('approved');
+      triggerVibrate([150, 80, 150]);
+      showInAppNotification({
+        icon: '✅',
+        type: 'ok',
+        title: 'Peminjaman Disetujui! 🎉',
+        msg: `Pengajuan alat <strong>${e(itemsText)}</strong> (${e(evt.nama || '')}) telah disetujui petugas.`,
+        actLabel: 'Lihat Riwayat',
+        actFn: () => { setHistFilter('all'); showTab('history'); }
+      });
+      showSystemNotification('✅ Peminjaman Disetujui', {
+        body: `Pengajuan alat ${itemsText} telah disetujui.`,
+        tag: 'status-' + (evt.reqId || Date.now())
+      });
+    } else if (isRejected) {
+      AudioNotif.play('rejected');
+      triggerVibrate([250, 100, 250]);
+      showInAppNotification({
+        icon: '❌',
+        type: 'no',
+        title: 'Peminjaman Ditolak',
+        msg: `Pengajuan alat <strong>${e(itemsText)}</strong> ditolak oleh petugas.`,
+        actLabel: 'Lihat Detail',
+        actFn: () => { setHistFilter('all'); showTab('history'); }
+      });
+      showSystemNotification('❌ Peminjaman Ditolak', {
+        body: `Pengajuan alat ${itemsText} ditolak.`,
+        tag: 'status-' + (evt.reqId || Date.now())
+      });
+    }
+  }
+
+  // 4. Skenario: Pengembalian Dikonfirmasi Selesai
+  else if (evt.type === 'return_confirmed') {
+    AudioNotif.play('approved');
+    triggerVibrate([150, 90, 200]);
+    showInAppNotification({
+      icon: '📦',
+      type: 'ok',
+      title: 'Pengembalian Selesai! ✅',
+      msg: `Pengembalian alat <strong>${e(itemsText)}</strong> telah diverifikasi dan dikonfirmasi petugas. Terima kasih!`,
+      actLabel: 'Buka Riwayat',
+      actFn: () => { setHistFilter('all'); showTab('history'); }
+    });
+    showSystemNotification('📦 Pengembalian Selesai', {
+      body: `Pengembalian alat ${itemsText} telah diverifikasi petugas.`,
+      tag: 'ret-confirm-' + (evt.reqId || Date.now())
+    });
+  }
+
+  // 5. Skenario: Pengembalian Ditolak
+  else if (evt.type === 'return_rejected') {
+    AudioNotif.play('rejected');
+    triggerVibrate([200, 80, 200]);
+    showInAppNotification({
+      icon: '↩️',
+      type: 'no',
+      title: 'Pengembalian Perlu Ditinjau',
+      msg: `Pengembalian alat <strong>${e(itemsText)}</strong> belum disetujui petugas. Silakan hubungi petugas.`,
+      actLabel: 'Buka Riwayat',
+      actFn: () => { setHistFilter('all'); showTab('history'); }
+    });
+  }
+}
+
+/* ─── MODAL HUBUNGKAN HP & QR CODE ───────────────────────── */
+async function openHpConnectModal() {
+  let netData = { ip: '127.0.0.1', port: 8088, wifi: 'Wi-Fi Lokal', url: window.location.origin + '/', urls: [] };
+  try {
+    const res = await fetch('/api/network-info', { cache: 'no-store' });
+    if (res.ok) {
+      netData = await res.json();
+    }
+  } catch(e) {}
+
+  const port = netData.port || window.location.port || 8088;
+  const wifi = netData.wifi || 'Wi-Fi Lokal';
+  const urls = (netData.urls && netData.urls.length > 0) ? netData.urls : [netData.url || `http://${netData.ip}:${port}/`];
+  const primaryUrl = urls[0];
+
+  const body = `
+    <div class="hp-connect-modal-box">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:8px;">
+        Buka kamera di HP Anda dan scan QR Code di bawah untuk langsung membuka formulir peminjaman:
+      </div>
+      <div class="hp-qr-wrap" id="hp-modal-qr">
+        <div style="font-size:12px;color:var(--text2);padding:20px;">Memuat QR Code...</div>
+      </div>
+      
+      <div style="margin-top:10px;text-align:left;">
+        <label class="fl" style="font-size:11px;">Alamat URL Jaringan Wi-Fi (Buka di Chrome HP):</label>
+        ${urls.map((u) => `
+          <div class="hp-url-pill">
+            <span style="font-size:12px;user-select:all;">${u}</span>
+            <button class="btn btn-ghost btn-sm" onclick="copyTextToClipboard('${u}')" style="padding:3px 8px;font-size:11px;min-height:26px;" title="Salin URL">
+              📋 Salin
+            </button>
+          </div>
+        `).join('')}
+      </div>
+
+      <div style="background:var(--surface2);border-radius:10px;padding:10px 12px;margin-top:12px;text-align:left;font-size:11px;color:var(--text2);line-height:1.5;">
+        <div>📶 <b>Nama Wi-Fi:</b> <span style="color:var(--primary);font-weight:600;">${e(wifi)}</span></div>
+        <div style="margin-top:4px;">💡 <b>Sinkronisasi Otomatis:</b> Jika Anda meminjam alat lewat HP, data peminjaman akan <b>langsung muncul di laptop/desktop ini secara real-time</b> tanpa perlu muat ulang halaman!</div>
+      </div>
+    </div>
+  `;
+
+  openModal('📱 Hubungkan HP & Sinkronisasi', body, [
+    { label: 'Tutup', cls: 'btn-ghost', fn: 'closeModal()' }
+  ]);
+
+  // Render QR Code
+  setTimeout(() => {
+    const qrContainer = document.getElementById('hp-modal-qr');
+    if (!qrContainer) return;
+    qrContainer.innerHTML = '';
+    if (typeof QRCode !== 'undefined') {
+      try {
+        new QRCode(qrContainer, {
+          text: primaryUrl,
+          width: 170,
+          height: 170,
+          colorDark: '#1a1830',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } catch(ex) {
+        qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=${encodeURIComponent(primaryUrl)}" width="170" height="170" alt="QR Code">`;
+      }
+    } else {
+      qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=${encodeURIComponent(primaryUrl)}" width="170" height="170" alt="QR Code">`;
+    }
+  }, 80);
+}
+
+function copyTextToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => toast('Alamat URL berhasil disalin! 📋', 'ok')).catch(() => copyFallback(text));
+  } else {
+    copyFallback(text);
+  }
+}
+function copyFallback(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand('copy');
+  ta.remove();
+  toast('Alamat URL berhasil disalin! 📋', 'ok');
+}
+
+function loadLocalDb() {
+  const raw = localStorage.getItem(DB_KEY);
+  if (raw) {
+    try {
+      db = JSON.parse(raw);
+      if (S.tab === 'dash')     renderDash();
+      if (S.tab === 'return')   renderReturn();
+      if (S.tab === 'history')  renderHist();
+      renderActiveBorrowed();
+      applyBranding();
+    } catch(e) {}
+  }
+}
+
+/* ─── CRYPTO (Pure JS + SubtleCrypto Fallback) ───────────── */
+function sha256Sync(ascii) {
+  function rightRotate(value, amount) {
+    return (value >>> amount) | (value << (32 - amount));
+  }
+  var mathPow = Math.pow;
+  var maxWord = mathPow(2, 32);
+  var lengthProperty = 'length';
+  var i, j;
+  var result = '';
+  var words = [];
+  var asciiBitLength = ascii[lengthProperty] * 8;
+  
+  var hash = [];
+  var k = [];
+  var primeCounter = 0;
+
+  var isComposite = {};
+  for (var candidate = 2; primeCounter < 64; candidate++) {
+    if (!isComposite[candidate]) {
+      for (i = 0; i < 313; i += candidate) {
+        isComposite[i] = candidate;
+      }
+      hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;
+      k[primeCounter++] = (mathPow(candidate, 1/3) * maxWord) | 0;
+    }
+  }
+  
+  ascii += '\x80';
+  while (ascii[lengthProperty] % 64 - 56) ascii += '\x00';
+  for (i = 0; i < ascii[lengthProperty]; i++) {
+    j = ascii.charCodeAt(i);
+    words[i >> 2] |= j << ((3 - i) % 4) * 8;
+  }
+  words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);
+  words[words[lengthProperty]] = (asciiBitLength) | 0;
+  
+  for (j = 0; j < words[lengthProperty];) {
+    var w = words.slice(j, j += 16);
+    var oldHash = hash.slice(0);
+    
+    for (i = 0; i < 64; i++) {
+      var i2 = i + j;
+      var w15 = w[i - 15], w2 = w[i - 2];
+
+      var a = hash[0], e = hash[4];
+      var temp1 = hash[7]
+        + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
+        + ((e & hash[5]) ^ ((~e) & hash[6]))
+        + k[i]
+        + (w[i] = (i < 16) ? w[i] : (
+            w[i - 16]
+            + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
+            + w[i - 7]
+            + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
+          ) | 0
+        );
+      var temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
+        + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+      
+      hash = [(temp1 + temp2) | 0].concat(hash);
+      hash[4] = (hash[4] + temp1) | 0;
+    }
+    
+    for (i = 0; i < 8; i++) {
+      hash[i] = (hash[i] + oldHash[i]) | 0;
+    }
+  }
+  
+  for (i = 0; i < 8; i++) {
+    for (j = 3; j >= 0; j--) {
+      var b = (hash[i] >> (8 * j)) & 255;
+      result += (b < 16 ? '0' : '') + b.toString(16);
+    }
+  }
+  return result;
+}
+
+async function sha256(str) {
+  try {
+    if (window.crypto && crypto.subtle && typeof crypto.subtle.digest === 'function') {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+  } catch (err) {}
+  return sha256Sync(str);
+}
+
+/* ─── ESCAPE ─────────────────────────────────────────────── */
+function e(s) {
+  return s == null ? '' : String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+/* ─── TOAST ──────────────────────────────────────────────── */
+function toast(msg, type='') {
+  const w = document.getElementById('toast-wrap');
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' '+type : '');
+  el.textContent = msg;
+  w.appendChild(el);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 300); }, 3200);
+}
+
+/* ─── IMAGE ──────────────────────────────────────────────── */
+function shrink(file) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 720;
+        let w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h*MAX/w); w = MAX; }
+          else       { w = Math.round(w*MAX/h); h = MAX; }
+        }
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(c.toDataURL('image/jpeg', 0.7));
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ─── DARK MODE ──────────────────────────────────────────── */
+function applyDark(v) {
+  document.documentElement.setAttribute('data-dark', v ? 'true' : 'false');
+  const t = document.getElementById('dark-tog');
+  if (t) t.classList.toggle('on', v);
+}
+function toggleDark() { db.settings.dark = !db.settings.dark; applyDark(db.settings.dark); save(); }
+
+/* ─── DESKTOP vs MOBILE VIEW MODE (RESPONSIF) ────────────── */
+function applyViewMode(mode, showToast = false) {
+  const finalMode = (mode === 'mobile') ? 'mobile' : 'desktop';
+  document.documentElement.setAttribute('data-view-mode', finalMode);
+  if (document.body) document.body.setAttribute('data-view-mode', finalMode);
+  try { localStorage.setItem('balikin_view_mode', finalMode); } catch(e){}
+
+  // Tombol toggle cepat di header
+  const vmIcon = document.getElementById('hdr-vm-icon');
+  const vmBtn = document.getElementById('hdr-vm-btn');
+  if (vmIcon) {
+    vmIcon.textContent = finalMode === 'mobile' ? '💻' : '📱';
+  }
+  if (vmBtn) {
+    vmBtn.title = finalMode === 'mobile' ? 'Beralih ke Tampilan Desktop Luas' : 'Beralih ke Simulasi Tampilan HP';
+    vmBtn.setAttribute('aria-label', vmBtn.title);
+  }
+
+  // Tombol pilihan di menu pengaturan
+  const optDesktop = document.getElementById('vm-opt-desktop');
+  const optMobile = document.getElementById('vm-opt-mobile');
+  if (optDesktop && optMobile) {
+    optDesktop.classList.toggle('active', finalMode === 'desktop');
+    optMobile.classList.toggle('active', finalMode === 'mobile');
+  }
+
+  if (showToast) {
+    toast(finalMode === 'mobile' ? 'Beralih ke Simulasi Tampilan Layar HP 📱' : 'Beralih ke Mode Tampilan Desktop Luas 💻', 'ok');
+  }
+}
+
+function setViewMode(mode) {
+  applyViewMode(mode, true);
+}
+
+function toggleViewMode() {
+  const current = localStorage.getItem('balikin_view_mode') || 'desktop';
+  const next = current === 'mobile' ? 'desktop' : 'mobile';
+  applyViewMode(next, true);
+}
+
+function initViewMode() {
+  const saved = localStorage.getItem('balikin_view_mode') || 'desktop';
+  applyViewMode(saved, false);
+}
+
+/* ─── BROADCAST & STORAGE SYNC ───────────────────────────── */
+window.addEventListener('storage', ev => { if (ev.key === DB_KEY) syncCheck(); });
+
+async function syncCheck() {
+  const raw = localStorage.getItem(DB_KEY);
+  if (!raw) return;
+  const fresh = JSON.parse(raw);
+  const myIds = JSON.parse(localStorage.getItem(ME_KEY) || '[]');
+  const notifLabel = { ok:'Disetujui ✅', no:'Ditolak ❌', returned:'Dikonfirmasi Kembali 📦', returning:'Pengembalian diproses 🔄' };
+  myIds.forEach(id => {
+    const oldR = db.reqs.find(r => r.id === id);
+    const newR = fresh.reqs.find(r => r.id === id);
+    if (oldR && newR && oldR.st !== newR.st) {
+      const lbl = notifLabel[newR.st] || newR.st;
+      const type = ['ok','returned'].includes(newR.st) ? 'ok' : ['no'].includes(newR.st) ? 'err' : '';
+      toast(`Pengajuan ${lbl}`, type);
+      if ('Notification' in window && Notification.permission === 'granted')
+        new Notification('Status Peminjaman', { body:`Pengajuan Anda: ${lbl}` });
+    }
+  });
+  db = fresh;
+  renderActiveBorrowed();
+  if (S.tab === 'return') renderReturn();
+  if (S.tab === 'history') renderHist();
+  if (S.tab === 'dash' && S.isAdmin) renderDash();
+}
+
+/* ─── LOGIN ──────────────────────────────────────────────── */
+function switchLTab(tab) {
+  ['borrower','officer'].forEach(t => {
+    const tabEl = document.getElementById('ltab-'+t);
+    const panelEl = document.getElementById('lp-'+t);
+    if (tabEl) tabEl.classList.toggle('active', t===tab);
+    if (panelEl) panelEl.classList.toggle('hidden', t!==tab);
+  });
+  if (tab === 'officer') {
+    setTimeout(() => {
+      const u = document.getElementById('l-user');
+      if (u) u.focus();
+    }, 80);
+  }
+}
+function enterBorrower() { S.isAdmin = false; showApp(); }
+
+function togglePassVis() {
+  const p = document.getElementById('l-pass');
+  if (!p) return;
+  const isPass = p.type === 'password';
+  p.type = isPass ? 'text' : 'password';
+  const icon = document.getElementById('eye-icon');
+  if (icon) {
+    if (isPass) {
+      icon.innerHTML = `<path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.44-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78 3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>`;
+    } else {
+      icon.innerHTML = `<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>`;
+    }
+  }
+}
+
+async function doLogin() {
+  const u = (document.getElementById('l-user')?.value || '').trim().toLowerCase();
+  const p = (document.getElementById('l-pass')?.value || '');
+  const btn = document.getElementById('l-btn');
+  const err = document.getElementById('l-err');
+  if (!u || !p) { showErr(err, 'Username dan password wajib diisi.'); return; }
+  
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spin"></div> Memeriksa...';
+  }
+  
+  try {
+    const h = await sha256(p);
+    // Pencocokan username case-insensitive
+    const user = db.users.find(x => x.u.toLowerCase() === u && x.h === h);
+    if (user) {
+      localStorage.setItem(SESS_KEY, '1');
+      S.isAdmin = true;
+      if (err) err.classList.add('hidden');
+      showApp();
+    } else {
+      showErr(err, 'Username atau password salah.<br><small style="opacity:.85">Bawaan: username <b>admin</b>, password <b>admin123</b></small>');
+    }
+  } catch (ex) {
+    showErr(err, 'Kendala autentikasi: ' + ex.message);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Masuk sebagai Petugas';
+    }
+  }
+}
+function showErr(el, msg) { if (el) { el.innerHTML = msg; el.classList.remove('hidden'); } }
+
+function doLogout() {
+  localStorage.removeItem(SESS_KEY);
+  S.isAdmin = false;
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('l-user').value = '';
+  document.getElementById('l-pass').value = '';
+  showTab('form');
+  updateAdminUI();
+}
+
+function goToLanding() {
+  if (S.isAdmin) {
+    doLogout();
+  } else {
+    document.getElementById('app').classList.add('hidden');
+    document.getElementById('login-screen').style.display = 'flex';
+    switchLTab('borrower');
+  }
+}
+
+/* ─── APP ────────────────────────────────────────────────── */
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').classList.remove('hidden');
+  updateAdminUI();
+  applyBranding();
+  initForm();
+  renderReturn();
+  renderHist();
+  renderSettings();
+  if (S.isAdmin) { renderDash(); renderPJ(); }
+  showTab(S.isAdmin ? 'dash' : 'form');
+  if ('Notification' in window && Notification.permission === 'default')
+    Notification.requestPermission();
+}
+
+function updateAdminUI() {
+  ['tab-dash','tab-pj','tab-settings'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('hidden', !S.isAdmin);
+  });
+
+  const dashBtn = document.getElementById('hdr-dash-btn');
+  if (dashBtn) dashBtn.classList.toggle('hidden', !S.isAdmin);
+
+  const lb = document.getElementById('logout-btn');
+  if (lb) lb.classList.toggle('hidden', !S.isAdmin);
+  const hb = document.getElementById('home-btn');
+  if (hb) hb.classList.toggle('hidden', S.isAdmin);
+  const role = document.getElementById('hdr-role');
+  if (role) role.textContent = S.isAdmin ? '👤 Petugas (admin)' : '👤 Peminjam';
+}
+
+function goToLandingPetugas() {
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('login-screen').style.display = 'flex';
+  switchLTab('officer');
+  setTimeout(() => document.getElementById('l-user')?.focus(), 100);
+}
+
+function applyBranding() {
+  const { org, logo } = db.settings;
+  document.title = (org || 'BalikinGo') + ' — Peminjaman Alat';
+  const hOrg = document.getElementById('hdr-org');
+  if (hOrg) hOrg.textContent = org || 'BalikinGo';
+  const hLogo = document.getElementById('hdr-logo');
+  const hPh   = document.getElementById('hdr-logo-ph');
+  if (logo) { hLogo.src=logo; hLogo.classList.remove('hidden'); hPh.classList.add('hidden'); }
+  else      { hLogo.classList.add('hidden'); hPh.classList.remove('hidden'); }
+  const lOrg = document.getElementById('login-org');
+  if (lOrg) lOrg.textContent = org || 'BalikinGo';
+  const lBox = document.getElementById('login-logo-box');
+  if (lBox) {
+    if (logo) lBox.innerHTML = `<img src="${logo}" style="width:100%;height:100%;object-fit:cover;" alt="logo">`;
+    else lBox.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z" fill="white"/></svg>`;
+  }
+  applyDark(db.settings.dark);
+}
+
+/* ─── TABS ───────────────────────────────────────────────── */
+function showTab(tab) {
+  // Hanya petugas / admin yang berhak mengakses dash, pj, settings
+  if (!S.isAdmin && (tab === 'dash' || tab === 'pj' || tab === 'settings')) {
+    tab = 'form';
+  }
+  S.tab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab===tab));
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id==='view-'+tab));
+
+  const dashHdrBtn = document.getElementById('hdr-dash-btn');
+  if (dashHdrBtn) {
+    if (tab === 'dash') {
+      dashHdrBtn.style.color = 'var(--primary)';
+      dashHdrBtn.style.borderColor = 'var(--primary)';
+      dashHdrBtn.style.background = 'var(--pri-lt)';
+    } else {
+      dashHdrBtn.style.color = '';
+      dashHdrBtn.style.borderColor = '';
+      dashHdrBtn.style.background = '';
+    }
+  }
+
+  if (tab==='form')     { renderActiveBorrowed(); renderBorrowerPhoto(); }
+  if (tab==='return')   { returnPage=1; renderReturn(); }
+  if (tab==='history')  { histPage=1; renderHist(); }
+  if (tab==='dash')     { dashPage=1; renderDash(); }
+  if (tab==='pj')       renderPJ();
+  if (tab==='settings') renderSettings();
+}
+
+/* ─── ACTIVE BORROWED WIDGET ─────────────────────────────── */
+function renderActiveBorrowed() {
+  const wrap = document.getElementById('active-borrowed-wrap');
+  if (!wrap) return;
+
+  const myIds = JSON.parse(localStorage.getItem(ME_KEY)||'[]');
+  const activeReqs = db.reqs.filter(r => r.st === 'ok' || r.st === 'returning');
+  const pendingReqs = db.reqs.filter(r => r.st === 'wait');
+
+  let pendingBanner = '';
+  if (pendingReqs.length > 0) {
+    const latestPending = pendingReqs[pendingReqs.length - 1];
+    pendingBanner = `
+      <div class="pending-borrow-card fade-in" style="margin-bottom:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:9px;">
+            <span class="hdr-hp-pulse" style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block;box-shadow:0 0 0 3px rgba(245,158,11,.25);flex-shrink:0;"></span>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--warn);display:flex;align-items:center;gap:6px;">
+                <span>⏳ ${pendingReqs.length} Pengajuan Peminjaman Baru Menunggu Persetujuan</span>
+                <span class="badge device-badge-hp" style="font-size:10px;">Dari HP / Jaringan</span>
+              </div>
+              <div style="font-size:11px;color:var(--text2);margin-top:2px;">
+                <b>${e(latestPending.nama)}</b> (${latestPending.items.length} alat) diajukan pada ${new Date(latestPending.at).toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'})} WIB.
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button class="btn btn-ghost btn-sm" onclick="setHistFilter('all');showTab('history')" style="padding:4px 9px;font-size:11px;min-height:28px;">
+              Lihat di Riwayat →
+            </button>
+            ${S.isAdmin ? `<button class="btn btn-ok btn-sm" onclick="showTab('dash')" style="padding:4px 9px;font-size:11px;min-height:28px;">Dashboard Admin</button>` : ''}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // Kumpulkan barang dari semua peminjaman yang sedang aktif / belum kembali
+  const items = [];
+  activeReqs.forEach(r => {
+    const isMine = myIds.includes(r.id);
+    r.items.forEach(it => {
+      items.push({
+        reqId: r.id,
+        nama: r.nama,
+        pjN: r.pjN,
+        pjD: r.pjD,
+        tgl: r.tgl,
+        st: r.st,
+        isMine: isMine,
+        n: it.n,
+        ph: it.ph,
+        k: it.k || ''
+      });
+    });
+  });
+
+  if (items.length === 0) {
+    wrap.innerHTML = pendingBanner + `
+      <div class="active-borrowed-card empty-active" style="padding:11px 14px;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:16px;">✅</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--ok);">Semua Alat Tersedia</div>
+              <div style="font-size:11px;color:var(--text2);">Tidak ada alat yang sedang dipinjam saat ini.</div>
+            </div>
+          </div>
+          <span class="badge bo" style="font-size:10px;white-space:nowrap;">Siap Dipinjam</span>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const rows = items.map(item => `
+    <div class="active-item-row">
+      ${item.ph ? `<img src="${item.ph}" class="active-item-thumb" onclick="openLbx('${item.ph}')" alt="${e(item.n)}" title="Klik untuk lihat foto">` : `<div class="active-item-thumb" style="display:flex;align-items:center;justify-content:center;background:var(--surface2);"><svg viewBox="0 0 24 24" width="20" height="20" fill="var(--text2)"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg></div>`}
+      <div class="active-item-info">
+        <div class="active-item-name">${e(item.n)}</div>
+        <div class="active-item-meta">
+          <span>👤 <b>${e(item.nama)}</b>${item.isMine ? ' (Anda)' : ' <span class="badge device-badge-hp" style="font-size:9px;padding:1px 4px;">HP</span>'}</span>
+          <span>&bull;</span>
+          <span>PJ: ${e(item.pjN)}</span>
+          <span>&bull;</span>
+          <span>📅 ${e(item.tgl)}</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+        <span class="badge ${item.st === 'returning' ? 'brt' : 'bw'}" style="font-size:10px;">
+          ${item.st === 'returning' ? '🔄 Proses Kembali' : '⏳ Dipinjam'}
+        </span>
+        ${item.isMine && item.st === 'ok' ? `
+          <button class="btn btn-pri btn-sm" onclick="requestReturn('${item.reqId}')" style="padding:2px 8px;min-height:24px;font-size:10px;" title="Kembalikan alat ini">
+            Kembalikan
+          </button>` : ''}
+      </div>
+    </div>`).join('');
+
+  wrap.innerHTML = pendingBanner + `
+    <div class="active-borrowed-card">
+      <div class="active-borrowed-head">
+        <div>
+          <div class="active-borrowed-title">
+            <span>⏳ Alat Sedang Dipinjam / Belum Dikembalikan</span>
+          </div>
+          <div class="active-borrowed-sub">${items.length} alat di luar lab &bull; ${activeReqs.length} peminjaman aktif</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="showTab('return')" style="padding:4px 8px;min-height:28px;font-size:11px;" title="Buka menu pengembalian">
+          Pengembalian →
+        </button>
+      </div>
+      <div class="active-items-scroll">
+        ${rows}
+      </div>
+    </div>`;
+}
+
+/* ─── FORM ───────────────────────────────────────────────── */
+function initForm() {
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('f-tgl').value = today;
+  S.d.tgl = today;
+  if (S.d.items.length === 0) addItem();
+  renderItems();
+  renderBorrowerPhoto();
+  renderActiveBorrowed();
+  buildDD();
+}
+
+function triggerBorrowerPhoto() {
+  const fi = document.getElementById('fi-photo-user') || document.getElementById('fi-photo');
+  if (fi) fi.click();
+}
+
+async function onPhotoUser(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const data = await shrink(file);
+  S.d.phUser = data;
+  renderBorrowerPhoto();
+  ev.target.value = '';
+  toast('Foto peminjam berhasil diambil! 📸', 'ok');
+}
+
+function removeBorrowerPhoto() {
+  S.d.phUser = '';
+  renderBorrowerPhoto();
+  toast('Foto peminjam dihapus.');
+}
+
+function renderBorrowerPhoto() {
+  const slot = document.getElementById('borrower-ph-slot');
+  if (!slot) return;
+  if (S.d.phUser) {
+    slot.innerHTML = `
+      <div class="photo-slot">
+        <div class="photo-thumb-wrap">
+          <img src="${S.d.phUser}" class="photo-thumb borrower-photo-thumb" onclick="openLbx(this.src)" alt="Foto Peminjam" title="Klik perbesar foto peminjam">
+          <button class="photo-thumb-del" onclick="removeBorrowerPhoto()" type="button" title="Hapus foto peminjam">✕</button>
+        </div>
+        <button class="photo-retake-btn" onclick="triggerBorrowerPhoto()" type="button" title="Ganti foto peminjam">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M12 15.2A3.2 3.2 0 0 1 8.8 12 3.2 3.2 0 0 1 12 8.8 3.2 3.2 0 0 1 15.2 12 3.2 3.2 0 0 1 12 15.2M12 7A5 5 0 0 0 7 12a5 5 0 0 0 5 5 5 5 0 0 0 5-5A5 5 0 0 0 12 7M0 5V21h24V5H17l-2-2H9L7 5H0Z"/></svg>
+          <span>Ganti</span>
+        </button>
+      </div>`;
+  } else {
+    slot.innerHTML = `
+      <button class="photo-btn-row" onclick="triggerBorrowerPhoto()" type="button" title="Ambil foto peminjam">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 15.2A3.2 3.2 0 0 1 8.8 12 3.2 3.2 0 0 1 12 8.8 3.2 3.2 0 0 1 15.2 12 3.2 3.2 0 0 1 12 15.2M12 7A5 5 0 0 0 7 12a5 5 0 0 0 5 5 5 5 0 0 0 5-5A5 5 0 0 0 12 7M0 5V21h24V5H17l-2-2H9L7 5H0Z"/></svg>
+        <span>Ambil Foto</span>
+      </button>`;
+  }
+}
+
+function addItem() { S.d.items.push({ n:'', k:'', ph:'' }); renderItems(); }
+
+function removeItem(i) {
+  if (S.d.items.length <= 1) { toast('Minimal 1 barang diperlukan.','err'); return; }
+  S.d.items.splice(i,1); renderItems();
+}
+
+function removeItemPhoto(i) {
+  if (S.d.items[i]) {
+    S.d.items[i].ph = '';
+    renderItems();
+    toast('Foto barang dihapus.');
+  }
+}
+
+function renderItems() {
+  document.getElementById('items-list').innerHTML = S.d.items.map((it, i) => `
+    <div class="irow fade-in">
+      <div class="irow-head">
+        <span class="irow-num">Barang #${i+1}</span>
+        ${S.d.items.length > 1 ? `
+          <button class="btn-del-item" onclick="removeItem(${i})" type="button" title="Hapus barang ini">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            <span>Hapus</span>
+          </button>` : ''}
+      </div>
+      <div class="irow-row">
+        ${it.ph ? `
+          <div class="photo-slot">
+            <div class="photo-thumb-wrap">
+              <img src="${it.ph}" class="photo-thumb" onclick="openLbx('${it.ph}')" alt="foto" title="Klik untuk memperbesar">
+              <button class="photo-thumb-del" onclick="removeItemPhoto(${i})" type="button" title="Hapus foto barang">✕</button>
+            </div>
+            <button class="photo-retake-btn" onclick="triggerPhoto(${i})" type="button" title="Ganti foto">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 15.2A3.2 3.2 0 0 1 8.8 12 3.2 3.2 0 0 1 12 8.8 3.2 3.2 0 0 1 15.2 12 3.2 3.2 0 0 1 12 15.2M12 7A5 5 0 0 0 7 12a5 5 0 0 0 5 5 5 5 0 0 0 5-5A5 5 0 0 0 12 7M0 5V21h24V5H17l-2-2H9L7 5H0Z"/></svg>
+              <span>Ganti</span>
+            </button>
+          </div>
+        ` : `
+          <button class="photo-btn-row" onclick="triggerPhoto(${i})" type="button" title="Ambil foto barang">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 15.2A3.2 3.2 0 0 1 8.8 12 3.2 3.2 0 0 1 12 8.8 3.2 3.2 0 0 1 15.2 12 3.2 3.2 0 0 1 12 15.2M12 7A5 5 0 0 0 7 12a5 5 0 0 0 5 5 5 5 0 0 0 5-5A5 5 0 0 0 12 7M0 5V21h24V5H17l-2-2H9L7 5H0Z"/></svg>
+            <span>Ambil Foto</span>
+          </button>
+        `}
+        <input class="fi item-name-fi" type="text" placeholder="Nama barang *" value="${e(it.n)}" oninput="upItem(${i},'n',this.value)">
+      </div>
+    </div>`).join('');
+}
+
+function upItem(i, f, v) { S.d.items[i][f] = v; }
+function triggerPhoto(i) { S.photoTarget = i; document.getElementById('fi-photo').click(); }
+
+let retPhotoData = '';
+async function onPhoto(ev) {
+  const file = ev.target.files[0]; if (!file) return;
+  const data = await shrink(file);
+  if (S.photoTarget === 'ret') {
+    retPhotoData = data;
+    const wrap = document.getElementById('ret-ph-wrap');
+    if (wrap) wrap.innerHTML = `
+      <img src="${data}" style="width:64px;height:64px;border-radius:10px;object-fit:cover;border:2px solid var(--border);cursor:zoom-in;" onclick="openLbx(this.src)" alt="foto kembali">
+      <button class="btn btn-ghost btn-sm" onclick="triggerRetPhoto()" style="align-self:center;">Ganti</button>`;
+  } else {
+    S.d.items[S.photoTarget].ph = data;
+    renderItems();
+  }
+  ev.target.value = '';
+}
+
+/* PJ Dropdown */
+function buildDD() {
+  const q = S.ddFilter.toLowerCase();
+  const list = db.pj.filter(p => p.nama.toLowerCase().includes(q) || p.div.toLowerCase().includes(q));
+  const groups = {};
+  list.forEach(p => { if (!groups[p.div]) groups[p.div]=[]; groups[p.div].push(p); });
+  const dd = document.getElementById('pj-dd');
+  if (!list.length) { dd.innerHTML=`<div class="dd-opt" style="color:var(--text2)">Tidak ada penanggung jawab</div>`; return; }
+  let html = '';
+  Object.keys(groups).sort().forEach(div => {
+    html += `<div class="dd-grp">${e(div)}</div>`;
+    groups[div].forEach(p => { html += `<div class="dd-opt" onmousedown="selPJ('${e(p.id)}','${e(p.nama)}','${e(p.div)}')">${e(p.nama)}</div>`; });
+  });
+  dd.innerHTML = html;
+}
+function filterPJ(v) { S.ddFilter = v; buildDD(); document.getElementById('pj-dd').classList.remove('hidden'); }
+function showDD()     { S.ddFilter = ''; buildDD(); document.getElementById('pj-dd').classList.remove('hidden'); }
+function hideDD()     { setTimeout(() => document.getElementById('pj-dd').classList.add('hidden'), 160); }
+function selPJ(id, nama, div) {
+  S.d.pjId=id; S.d.pjN=nama; S.d.pjD=div;
+  document.getElementById('pj-search').value = `${nama} (${div})`;
+  document.getElementById('pj-dd').classList.add('hidden');
+}
+
+document.addEventListener('input', ev => { const m=ev.target.dataset.m; if (m) S.d[m]=ev.target.value; });
+
+function validateForm() {
+  if (!S.d.pjId) { toast('Pilih penanggung jawab terlebih dahulu.','err'); return false; }
+  if (!document.getElementById('f-nama').value.trim()) { toast('Nama peminjam wajib diisi.','err'); return false; }
+  if (!document.getElementById('f-tgl').value) { toast('Tanggal pinjam wajib diisi.','err'); return false; }
+  for (let i=0; i<S.d.items.length; i++) {
+    const it = S.d.items[i];
+    if (!it.n.trim()) { toast(`Nama barang #${i+1} wajib diisi.`,'err'); return false; }
+    if (!it.ph)       { toast(`Foto barang #${i+1} wajib diambil.`,'err'); return false; }
+  }
+  return true;
+}
+
+function submitForm() {
+  if (!validateForm()) return;
+  const now = new Date().toISOString();
+  const req = {
+    id:uid(), pj:S.d.pjId, pjN:S.d.pjN, pjD:S.d.pjD,
+    nama:document.getElementById('f-nama').value.trim(),
+    tgl:document.getElementById('f-tgl').value,
+    phUser: S.d.phUser || '',
+    fotoPeminjam: S.d.phUser || '',
+    items:S.d.items.map(it=>({ n:it.n.trim(), k:(it.k||'').trim(), ph:it.ph })),
+    st:'wait', at:now, dec:null,
+    retNote:'', retCond:'', retPh:'', retAt:null
+  };
+  db.reqs.push(req);
+  db.logs.push({ id:uid(), rid:req.id, st:'wait', note:'Pengajuan dibuat', at:now });
+  const myIds = JSON.parse(localStorage.getItem(ME_KEY)||'[]');
+  myIds.push(req.id);
+  localStorage.setItem(ME_KEY, JSON.stringify(myIds));
+  save();
+  notifyServer({
+    type: 'loan_new',
+    reqId: req.id,
+    nama: req.nama,
+    items: req.items.map(it => it.n),
+    pjN: req.pjN,
+    tgl: req.tgl,
+    phUser: req.phUser
+  });
+  toast('Pengajuan berhasil dikirim! ✅','ok');
+  S.d = { nama:'', tgl:new Date().toISOString().slice(0,10), pjId:'', pjN:'', pjD:'', items:[{n:'',k:'',ph:''}], phUser:'' };
+  document.getElementById('f-nama').value='';
+  document.getElementById('f-tgl').value=S.d.tgl;
+  document.getElementById('pj-search').value='';
+  renderItems();
+  renderBorrowerPhoto();
+  renderActiveBorrowed();
+  showTab('history');
+}
+
+/* ─── HISTORY ────────────────────────────────────────────── */
+const STLBL = { wait:'Menunggu', ok:'Disetujui', no:'Ditolak', returning:'Dikembalikan', returned:'Selesai' };
+const STIC  = { wait:'⏳', ok:'✅', no:'❌', returning:'🔄', returned:'📦' };
+const STBC  = { wait:'bw', ok:'bo', no:'bn', returning:'brt', returned:'br' };
+const BANNER_CLS = { wait:'baw', ok:'bao', no:'ban', returning:'bart', returned:'bar' };
+const BANNER_MSG = {
+  wait:'Pengajuan terbaru sedang menunggu persetujuan.',
+  ok:'Pengajuan terbaru Anda telah disetujui! Kembalikan alat tepat waktu.',
+  no:'Pengajuan terbaru ditolak. Gunakan "Ajukan Ulang" jika perlu.',
+  returning:'Pengembalian sedang menunggu konfirmasi petugas.',
+  returned:'Alat telah dikembalikan dan dikonfirmasi. Terima kasih!'
+};
+
+let histFilter = 'all';    // 'all' = semua peminjaman (termasuk dari HP), 'mine' = perangkat/browser ini
+let histStatusF = 'all';   // 'all', 'wait', 'ok', 'returning', 'returned', 'no'
+
+function setHistFilter(f) {
+  histFilter = f;
+  histPage = 1;
+  const btnAll = document.getElementById('hft-all');
+  const btnMine = document.getElementById('hft-mine');
+  if (btnAll) btnAll.classList.toggle('active', f === 'all');
+  if (btnMine) btnMine.classList.toggle('active', f === 'mine');
+  renderHist();
+}
+
+function setHistStatusF(st, btn) {
+  histStatusF = st;
+  histPage = 1;
+  document.querySelectorAll('#view-history .fbtn').forEach(b => {
+    b.classList.toggle('active', b.dataset.hf === st);
+  });
+  renderHist();
+}
+
+function renderHist() {
+  const myIds = JSON.parse(localStorage.getItem(ME_KEY)||'[]');
+  
+  // Update badge total pada segmented filter
+  const myTotalCount = db.reqs.filter(r => myIds.includes(r.id)).length;
+  const allTotalCount = db.reqs.length;
+  const btnAll = document.getElementById('hft-all');
+  const btnMine = document.getElementById('hft-mine');
+  if (btnAll) btnAll.innerHTML = `🌐 Semua Peminjaman (${allTotalCount})`;
+  if (btnMine) btnMine.innerHTML = `📱 Perangkat Ini (${myTotalCount})`;
+
+  // Saring berdasarkan cakupan perangkat
+  let pool = [...db.reqs].reverse();
+  if (histFilter === 'mine') {
+    pool = pool.filter(r => myIds.includes(r.id));
+  }
+
+  // Hitung statistik untuk pool saat ini
+  const stats = { wait:0, ok:0, no:0, returning:0, returned:0 };
+  pool.forEach(r => { if (stats[r.st] !== undefined) stats[r.st]++; });
+
+  const statsEl = document.getElementById('hist-stats');
+  if (statsEl) {
+    statsEl.innerHTML = `
+      <div class="scard"><div class="snum" style="color:var(--warn)">${stats.wait}</div><div class="slbl">Menunggu</div></div>
+      <div class="scard"><div class="snum" style="color:var(--ok)">${stats.ok}</div><div class="slbl">Disetujui</div></div>
+      <div class="scard"><div class="snum" style="color:var(--danger)">${stats.no}</div><div class="slbl">Ditolak</div></div>`;
+  }
+
+  // Saring berdasarkan status
+  let filtered = pool;
+  if (histStatusF !== 'all') {
+    filtered = filtered.filter(r => r.st === histStatusF);
+  }
+
+  // Banner status
+  const banner = document.getElementById('hist-banner');
+  if (banner) {
+    const latest = filtered[0] || pool[0];
+    if (latest) {
+      const isFromHp = !myIds.includes(latest.id);
+      const devNote = isFromHp ? ' (Diajukan via HP/Jaringan)' : '';
+      banner.innerHTML = `<div class="banner ${BANNER_CLS[latest.st]}">${STIC[latest.st]} ${BANNER_MSG[latest.st]}${devNote}</div>`;
+    } else {
+      banner.innerHTML = '';
+    }
+  }
+
+  const list = document.getElementById('hist-list');
+  if (!list) return;
+
+  if (!filtered.length) {
+    let emptyMsg = 'Belum ada riwayat peminjaman.';
+    if (histFilter === 'mine' && allTotalCount > 0) {
+      emptyMsg = `Belum ada peminjaman dari browser ini.<br><button class="btn btn-pri btn-sm" onclick="setHistFilter('all')" style="margin-top:10px;">Lihat ${allTotalCount} Peminjaman dari HP/Lainnya</button>`;
+    } else if (histStatusF !== 'all') {
+      emptyMsg = `Tidak ada peminjaman dengan status "${STLBL[histStatusF] || histStatusF}".`;
+    }
+    list.innerHTML = `<div class="empty"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg><p>${emptyMsg}</p></div>`;
+    return;
+  }
+
+  const shown = filtered.slice(0, histPage * PAGE);
+  const hasMore = filtered.length > shown.length;
+  list.innerHTML = shown.map(r => reqCard(r, S.isAdmin)).join('') +
+    (hasMore ? `<button class="pg-btn" onclick="histPage++;renderHist()">Muat ${Math.min(PAGE, filtered.length - shown.length)} data lagi ↓</button>` : '');
+}
+
+/* ─── REQ CARD ───────────────────────────────────────────── */
+function reqCard(r, isAdmin) {
+  const myIds = JSON.parse(localStorage.getItem(ME_KEY)||'[]');
+  const isMine = myIds.includes(r.id);
+
+  const thumbs = r.items.slice(0,4).map(it =>
+    `<img src="${it.ph}" class="rthumb" onclick="openLbx('${it.ph}')" alt="${e(it.n)}" title="${e(it.n)}${it.k ? ' — ' + e(it.k) : ''}">`
+  ).join('');
+  const more = r.items.length - 4;
+  const userPhoto = r.phUser || r.fotoPeminjam || '';
+  const userAvatar = userPhoto ? `
+    <img src="${userPhoto}" class="borrower-avatar" onclick="openLbx('${userPhoto}')" alt="Foto ${e(r.nama)}" title="Foto Peminjam — Klik untuk memperbesar">
+  ` : `
+    <div class="borrower-avatar-initial">${e((r.nama || '?').charAt(0).toUpperCase())}</div>
+  `;
+
+  // Badge asal perangkat
+  const deviceBadge = isMine 
+    ? `<span class="badge device-badge-local" title="Diajukan dari browser perangkat ini">💻 Perangkat Ini</span>`
+    : `<span class="badge device-badge-hp" title="Diajukan dari HP / perangkat lain melalui Wi-Fi">📱 Dari HP</span>`;
+
+  // Return info box
+  let retBox = '';
+  if (r.st === 'returning') {
+    retBox = `<div class="ret-box pending">🔄 Menunggu konfirmasi petugas
+      ${r.retCond ? ` • Kondisi: ${r.retCond === 'ok' ? 'Baik' : '⚠️ Ada Kerusakan'}` : ''}
+      ${r.retNote ? ` • "${e(r.retNote)}"` : ''}
+    </div>`;
+  } else if (r.st === 'returned') {
+    retBox = `<div class="ret-box">📦 Selesai dikembalikan
+      ${r.retAt ? ` • ${new Date(r.retAt).toLocaleDateString('id-ID')}` : ''}
+      ${r.retCond ? ` • Kondisi: ${r.retCond === 'ok' ? '✅ Baik' : '⚠️ Ada Kerusakan'}` : ''}
+      ${r.retNote ? `<br>📝 ${e(r.retNote)}` : ''}
+      ${r.retPh ? `<br><img src="${r.retPh}" style="width:48px;height:48px;border-radius:6px;object-fit:cover;margin-top:6px;cursor:zoom-in;" onclick="openLbx('${r.retPh}')" alt="foto kembali">` : ''}
+    </div>`;
+  }
+
+  // Action buttons
+  let acts = '';
+  if (isAdmin) {
+    if (r.st === 'wait') {
+      acts = `<button class="btn btn-ok btn-sm" onclick="decide('${r.id}','ok')">✅ Setujui</button>
+              <button class="btn btn-danger btn-sm" onclick="decide('${r.id}','no')">❌ Tolak</button>`;
+    } else if (r.st === 'returning') {
+      acts = `<button class="btn btn-ok btn-sm" onclick="confirmReturn('${r.id}')">📦 Konfirmasi Kembali</button>
+              <button class="btn btn-danger btn-sm" onclick="rejectReturn('${r.id}')">↩️ Tolak Kembali</button>`;
+    } else if (r.st !== 'returned') {
+      acts = `<button class="btn btn-ghost btn-sm" onclick="decide('${r.id}','wait')">↩️ Reset</button>`;
+    }
+    acts += ` <button class="btn btn-ghost btn-sm" onclick="reqDetail('${r.id}')">🔍 Detail</button>`;
+  } else {
+    if (r.st === 'ok' && isMine)   acts = `<button class="btn btn-pri btn-sm" onclick="requestReturn('${r.id}')">📦 Kembalikan</button>`;
+    if (r.st === 'no' && isMine)   acts = `<button class="btn btn-ghost btn-sm" onclick="resubmit('${r.id}')">🔄 Ajukan Ulang</button>`;
+    acts += ` <button class="btn btn-ghost btn-sm" onclick="reqDetail('${r.id}')">Detail</button>`;
+  }
+
+  return `
+    <div class="req ${r.st} fade-in">
+      <div class="req-head">
+        <div style="display:flex;gap:11px;align-items:center;min-width:0;">
+          ${userAvatar}
+          <div style="min-width:0;">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <span class="rname">${e(r.nama)}</span>
+              ${deviceBadge}
+            </div>
+            <div class="rmeta">PJ: ${e(r.pjN)} &bull; ${e(r.tgl)}</div>
+            <div class="rmeta">${r.items.length} barang &bull; ${new Date(r.at).toLocaleString('id-ID')}</div>
+            ${r.dec ? `<div class="rmeta">Keputusan: ${new Date(r.dec).toLocaleString('id-ID')}</div>` : ''}
+          </div>
+        </div>
+        <span class="badge ${STBC[r.st]}">${STIC[r.st]} ${STLBL[r.st]}</span>
+      </div>
+      <div class="rthumbs">${thumbs}${more > 0 ? `<div class="rmore">+${more}</div>` : ''}</div>
+      ${retBox}
+      <div class="ract">${acts}</div>
+    </div>`;
+}
+
+/* ─── DASHBOARD ──────────────────────────────────────────── */
+function setDashF(v, btn) {
+  S.dashF = v; dashPage = 1;
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.toggle('active', b.dataset.f===v));
+  renderDash();
+}
+
+function renderDash() {
+  const q = (document.getElementById('dash-search')?.value||'').toLowerCase();
+  const stats = { wait:0, ok:0, no:0, returning:0, returned:0 };
+  db.reqs.forEach(r => { if (stats[r.st] !== undefined) stats[r.st]++; });
+
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="scard"><div class="snum" style="color:var(--warn)">${stats.wait}</div><div class="slbl">Menunggu</div></div>
+    <div class="scard"><div class="snum" style="color:var(--ok)">${stats.ok}</div><div class="slbl">Disetujui</div></div>
+    <div class="scard"><div class="snum" style="color:var(--danger)">${stats.no}</div><div class="slbl">Ditolak</div></div>`;
+
+  let reqs = [...db.reqs].reverse();
+  if (S.dashF !== 'all') reqs = reqs.filter(r => r.st === S.dashF);
+  if (q) reqs = reqs.filter(r =>
+    r.nama.toLowerCase().includes(q) || r.pjN.toLowerCase().includes(q) ||
+    r.items.some(it => it.n.toLowerCase().includes(q) || (it.k && it.k.toLowerCase().includes(q)))
+  );
+
+  const list = document.getElementById('dash-list');
+  if (!reqs.length) {
+    list.innerHTML = `<div class="empty"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><p>Tidak ada pengajuan.</p></div>`;
+    return;
+  }
+  const shown = reqs.slice(0, dashPage * PAGE);
+  const hasMore = reqs.length > shown.length;
+  list.innerHTML = shown.map(r => reqCard(r, true)).join('') +
+    (hasMore ? `<button class="pg-btn" onclick="dashPage++;renderDash()">Muat ${Math.min(PAGE, reqs.length - shown.length)} data lagi ↓</button>` : '');
+}
+
+/* DECIDE */
+function decide(reqId, newSt) {
+  const req = db.reqs.find(r => r.id===reqId); if (!req) return;
+  req.st = newSt; req.dec = new Date().toISOString();
+  db.logs.push({ id:uid(), rid:reqId, st:newSt,
+    note: {ok:'Disetujui petugas',no:'Ditolak petugas',wait:'Direset'}[newSt]||newSt,
+    at:req.dec });
+  save();
+  notifyServer({
+    type: 'loan_status',
+    status: newSt,
+    reqId: req.id,
+    nama: req.nama,
+    items: req.items.map(it => it.n)
+  });
+  toast({ok:'Disetujui ✅',no:'Ditolak ❌',wait:'Direset ↩️'}[newSt]||'Diperbarui');
+  renderDash();
+  renderActiveBorrowed();
+  if (S.tab === 'return') renderReturn();
+}
+
+/* REQ DETAIL */
+function reqDetail(reqId) {
+  const r = db.reqs.find(x => x.id===reqId); if (!r) return;
+  const userPhoto = r.phUser || r.fotoPeminjam || '';
+  const items = r.items.map(it => `
+    <div style="display:flex;gap:10px;align-items:center;padding:9px;background:var(--surface2);border-radius:var(--r-xs);margin-bottom:7px;">
+      <img src="${it.ph}" style="width:52px;height:52px;border-radius:7px;object-fit:cover;cursor:zoom-in;" onclick="openLbx('${it.ph}')" alt="${e(it.n)}">
+      <div><div style="font-weight:600;font-size:14px;">${e(it.n)}</div>${it.k ? `<div style="font-size:12px;color:var(--text2)">Kode: ${e(it.k)}</div>` : ''}</div>
+    </div>`).join('');
+  const logs = db.logs.filter(l => l.rid===r.id).map(l => `
+    <div style="font-size:12px;padding:6px 0;border-bottom:1px solid var(--border);">
+      <span class="badge ${STBC[l.st]||'bw'}" style="margin-right:5px;">${STLBL[l.st]||l.st}</span>
+      ${e(l.note)} &bull; ${new Date(l.at).toLocaleString('id-ID')}
+    </div>`).join('');
+  const retSection = (r.st==='returning'||r.st==='returned') ? `
+    <div class="divider"></div>
+    <b style="font-size:13px;">Info Pengembalian:</b>
+    <div style="margin-top:8px;font-size:13px;line-height:1.8;">
+      Kondisi: <b>${r.retCond==='ok'?'✅ Baik':'⚠️ Ada Kerusakan'}</b><br>
+      ${r.retNote?`Catatan: ${e(r.retNote)}<br>`:''}
+      ${r.retAt?`Dikonfirmasi: ${new Date(r.retAt).toLocaleString('id-ID')}`:'(Menunggu konfirmasi)'}
+      ${r.retPh?`<br><img src="${r.retPh}" style="width:80px;height:80px;border-radius:8px;object-fit:cover;margin-top:8px;cursor:zoom-in;" onclick="openLbx('${r.retPh}')" alt="foto kembali">`: ''}
+    </div>` : '';
+
+  openModal(`Detail — ${e(r.nama)}`, `
+    <div style="display:flex;gap:14px;align-items:center;margin-bottom:12px;padding:10px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border);">
+      ${userPhoto ? `
+        <img src="${userPhoto}" style="width:64px;height:64px;border-radius:12px;object-fit:cover;border:2px solid var(--primary);box-shadow:var(--shadow-sm);cursor:zoom-in;flex-shrink:0;" onclick="openLbx('${userPhoto}')" alt="${e(r.nama)}" title="Klik untuk memperbesar foto peminjam">
+      ` : `
+        <div style="width:58px;height:58px;border-radius:12px;background:var(--pri-lt);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;flex-shrink:0;">${e((r.nama||'?').charAt(0).toUpperCase())}</div>
+      `}
+      <div style="font-size:13px;line-height:1.7;flex:1;min-width:0;">
+        <b>Peminjam:</b> ${e(r.nama)}<br>
+        <b>PJ:</b> ${e(r.pjN)} (${e(r.pjD)})<br>
+        <b>Tanggal:</b> ${e(r.tgl)} &bull; <b>Diajukan:</b> ${new Date(r.at).toLocaleString('id-ID')}<br>
+        <b>Status:</b> <span class="badge ${STBC[r.st]}">${STIC[r.st]} ${STLBL[r.st]}</span>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <b style="font-size:13px;">Barang yang Dipinjam:</b><div style="margin-top:8px;">${items}</div>
+    ${retSection}
+    <div class="divider"></div>
+    <b style="font-size:13px;">Log Aktivitas:</b><div style="margin-top:8px;">${logs}</div>
+  `, [{ label:'Tutup', cls:'btn-ghost', fn:'closeModal()' }]);
+}
+
+/* RESUBMIT */
+function resubmit(reqId) {
+  const r = db.reqs.find(x => x.id===reqId); if (!r) return;
+  S.d.pjId=r.pj; S.d.pjN=r.pjN; S.d.pjD=r.pjD;
+  S.d.items = r.items.map(it => ({ n:it.n, k:it.k, ph:it.ph }));
+  S.d.phUser = r.phUser || r.fotoPeminjam || '';
+  document.getElementById('f-nama').value = r.nama;
+  document.getElementById('f-tgl').value  = r.tgl;
+  document.getElementById('pj-search').value = `${r.pjN} (${r.pjD})`;
+  renderItems();
+  renderBorrowerPhoto();
+  showTab('form');
+  toast('Form diisi ulang dari pengajuan sebelumnya.');
+}
+
+/* ─── PHASE 3: RETURN MODULE ─────────────────────────────── */
+function setReturnF(v, btn) {
+  S.returnF = v;
+  returnPage = 1;
+  document.querySelectorAll('#return-filter-row .fbtn').forEach(b => b.classList.toggle('active', b.dataset.rf===v));
+  renderReturn();
+}
+
+function renderReturn() {
+  const q = (document.getElementById('return-search')?.value||'').toLowerCase().trim();
+  const myIds = JSON.parse(localStorage.getItem(ME_KEY)||'[]');
+  
+  // Semua peminjaman yang relevan untuk pengembalian
+  let allRelevant = db.reqs.filter(r => ['ok','returning','returned'].includes(r.st));
+  
+  // Hitung stats
+  const stats = { ok:0, returning:0, returned:0 };
+  const countPool = S.isAdmin ? allRelevant : allRelevant.filter(r => myIds.includes(r.id));
+  countPool.forEach(r => { if (stats[r.st] !== undefined) stats[r.st]++; });
+
+  const statsEl = document.getElementById('return-stats');
+  if (statsEl) {
+    statsEl.innerHTML = `
+      <div class="scard"><div class="snum" style="color:var(--warn)">${stats.ok}</div><div class="slbl">Sedang Dipinjam</div></div>
+      <div class="scard"><div class="snum" style="color:var(--purple)">${stats.returning}</div><div class="slbl">Konfirmasi</div></div>
+      <div class="scard"><div class="snum" style="color:var(--ok)">${stats.returned}</div><div class="slbl">Selesai</div></div>`;
+  }
+
+  // Jika admin: tampilkan semua
+  // Jika peminjam: tampilkan miliknya, atau semua jika sedang mencari nama di kolom search
+  let listPool = S.isAdmin ? allRelevant : (q ? allRelevant : allRelevant.filter(r => myIds.includes(r.id)));
+  let list = [...listPool].reverse();
+
+  // Filter status
+  if (S.returnF && S.returnF !== 'all') {
+    list = list.filter(r => r.st === S.returnF);
+  }
+
+  // Filter query pencarian
+  if (q) {
+    list = list.filter(r =>
+      r.nama.toLowerCase().includes(q) || r.pjN.toLowerCase().includes(q) || r.pjD.toLowerCase().includes(q) ||
+      r.items.some(it => it.n.toLowerCase().includes(q) || (it.k && it.k.toLowerCase().includes(q)))
+    );
+  }
+
+  const listEl = document.getElementById('return-list');
+  if (!listEl) return;
+
+  if (!list.length) {
+    let emptyMsg = 'Tidak ada alat yang perlu dikembalikan.';
+    if (!S.isAdmin && !myIds.length && !q) {
+      emptyMsg = 'Belum ada alat yang dipinjam dari perangkat ini.<br>Ketik nama Anda di kolom pencarian di atas atau ajukan peminjaman terlebih dahulu.';
+    } else if (S.returnF === 'ok') {
+      emptyMsg = 'Tidak ada alat yang sedang dipinjam saat ini. Semua alat telah dikembalikan! 🎉';
+    } else if (S.returnF === 'returning') {
+      emptyMsg = 'Tidak ada pengembalian yang menunggu konfirmasi saat ini.';
+    }
+    listEl.innerHTML = `
+      <div class="empty">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+        <p>${emptyMsg}</p>
+        <button class="btn btn-ghost btn-sm" onclick="showTab('form')" style="margin-top:12px;">📋 Ajukan Peminjaman Alat</button>
+      </div>`;
+    return;
+  }
+
+  const shown = list.slice(0, returnPage * PAGE);
+  const hasMore = list.length > shown.length;
+  listEl.innerHTML = shown.map(r => returnCard(r, S.isAdmin)).join('') +
+    (hasMore ? `<button class="pg-btn" onclick="returnPage++;renderReturn()">Muat ${Math.min(PAGE, list.length - shown.length)} data lagi ↓</button>` : '');
+}
+
+function returnCard(r, isAdmin) {
+  const thumbs = r.items.slice(0,4).map(it =>
+    `<img src="${it.ph}" class="rthumb" onclick="openLbx('${it.ph}')" alt="${e(it.n)}" title="${e(it.n)}${it.k ? ' — ' + e(it.k) : ''}">`
+  ).join('');
+  const more = r.items.length - 4;
+  const userPhoto = r.phUser || r.fotoPeminjam || '';
+  const userAvatar = userPhoto ? `
+    <img src="${userPhoto}" class="borrower-avatar" onclick="openLbx('${userPhoto}')" alt="Foto ${e(r.nama)}" title="Foto Peminjam — Klik untuk memperbesar">
+  ` : `
+    <div class="borrower-avatar-initial">${e((r.nama || '?').charAt(0).toUpperCase())}</div>
+  `;
+
+  let retBox = '';
+  if (r.st === 'returning') {
+    retBox = `<div class="ret-box pending">🔄 Menunggu konfirmasi petugas
+      ${r.retCond ? ` • Kondisi: <b>${r.retCond === 'ok' ? '✅ Baik' : '⚠️ Ada Kerusakan'}</b>` : ''}
+      ${r.retNote ? ` • "${e(r.retNote)}"` : ''}
+      ${r.retPh ? `<br><img src="${r.retPh}" style="width:48px;height:48px;border-radius:6px;object-fit:cover;margin-top:6px;cursor:zoom-in;" onclick="openLbx('${r.retPh}')" alt="foto kembali">` : ''}
+    </div>`;
+  } else if (r.st === 'returned') {
+    retBox = `<div class="ret-box">📦 Selesai dikembalikan
+      ${r.retAt ? ` • ${new Date(r.retAt).toLocaleDateString('id-ID')}` : ''}
+      ${r.retCond ? ` • Kondisi: <b>${r.retCond === 'ok' ? '✅ Baik' : '⚠️ Ada Kerusakan'}</b>` : ''}
+      ${r.retNote ? `<br>📝 ${e(r.retNote)}` : ''}
+      ${r.retPh ? `<br><img src="${r.retPh}" style="width:48px;height:48px;border-radius:6px;object-fit:cover;margin-top:6px;cursor:zoom-in;" onclick="openLbx('${r.retPh}')" alt="foto kembali">` : ''}
+    </div>`;
+  }
+
+  let acts = '';
+  if (r.st === 'ok') {
+    acts = `<button class="btn btn-pri btn-sm" onclick="requestReturn('${r.id}')">📦 Kembalikan Alat Ini</button>
+            <button class="btn btn-ghost btn-sm" onclick="reqDetail('${r.id}')">🔍 Detail</button>`;
+  } else if (r.st === 'returning') {
+    if (isAdmin) {
+      acts = `<button class="btn btn-ok btn-sm" onclick="confirmReturn('${r.id}')">✅ Konfirmasi Selesai</button>
+              <button class="btn btn-danger btn-sm" onclick="rejectReturn('${r.id}')">↩️ Tolak Kembali</button>
+              <button class="btn btn-ghost btn-sm" onclick="reqDetail('${r.id}')">🔍 Detail</button>`;
+    } else {
+      acts = `<button class="btn btn-ghost btn-sm" onclick="reqDetail('${r.id}')">🔍 Detail Pengembalian</button>`;
+    }
+  } else if (r.st === 'returned') {
+    if (isAdmin) {
+      acts = `<button class="btn btn-ghost btn-sm" onclick="decide('${r.id}','ok')">↩️ Reset ke Dipinjam</button>
+              <button class="btn btn-ghost btn-sm" onclick="reqDetail('${r.id}')">🔍 Detail</button>`;
+    } else {
+      acts = `<button class="btn btn-ghost btn-sm" onclick="reqDetail('${r.id}')">🔍 Detail</button>`;
+    }
+  }
+
+  const itemsSummary = r.items.map(it => e(it.n)).join(', ');
+
+  return `
+    <div class="req ${r.st} fade-in">
+      <div class="req-head">
+        <div style="display:flex;gap:11px;align-items:center;min-width:0;">
+          ${userAvatar}
+          <div style="min-width:0;">
+            <div class="rname">${e(r.nama)}</div>
+            <div class="rmeta">PJ: ${e(r.pjN)} &bull; Tanggal Pinjam: ${e(r.tgl)}</div>
+            <div class="rmeta" style="font-weight:500;color:var(--text);margin-top:3px;">Alat: ${itemsSummary}</div>
+            <div class="rmeta">${r.items.length} barang &bull; Diajukan ${new Date(r.at).toLocaleDateString('id-ID')}</div>
+          </div>
+        </div>
+        <span class="badge ${STBC[r.st]}">${STIC[r.st]} ${STLBL[r.st]}</span>
+      </div>
+      <div class="rthumbs">${thumbs}${more > 0 ? `<div class="rmore">+${more}</div>` : ''}</div>
+      ${retBox}
+      <div class="ract">${acts}</div>
+    </div>`;
+}
+
+function exportReturnExcel() {
+  const reqs = db.reqs.filter(r => ['ok','returning','returned'].includes(r.st));
+  if (!reqs.length) { toast('Belum ada data pengembalian untuk diekspor.','err'); return; }
+  const rows = [['ID','Peminjam','PJ','Divisi','Tanggal Pinjam','Status','Diajukan','Keputusan Petugas','Jml Barang','Daftar Barang','Kondisi Kembali','Catatan Pengembalian','Waktu Kembali']];
+  reqs.forEach(r => rows.push([
+    r.id, r.nama, r.pjN, r.pjD, r.tgl, STLBL[r.st],
+    new Date(r.at).toLocaleString('id-ID'),
+    r.dec ? new Date(r.dec).toLocaleString('id-ID') : '-',
+    r.items.length, r.items.map(i=>i.n).join(', '),
+    r.retCond ? (r.retCond==='ok'?'Baik / Normal':'Ada Kerusakan') : (r.st==='ok'?'Sedang Dipinjam':'-'),
+    r.retNote || '-',
+    r.retAt ? new Date(r.retAt).toLocaleString('id-ID') : '-'
+  ]));
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = rows[0].map(()=>({wch:18}));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Pengembalian');
+  XLSX.writeFile(wb, `pengembalian_${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast('Data pengembalian diekspor ke Excel ✅','ok');
+}
+
+function requestReturn(reqId) {
+  retPhotoData = '';
+  openModal('📦 Formulir Pengembalian', `
+    <p style="font-size:13px;color:var(--text2);margin-bottom:14px;">Isi kondisi barang saat dikembalikan. Petugas akan mengkonfirmasi.</p>
+    <div class="fg">
+      <label class="fl">Kondisi Barang *</label>
+      <select class="fi" id="ret-cond">
+        <option value="ok">✅ Baik / Normal</option>
+        <option value="rusak">⚠️ Ada Kerusakan</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label class="fl">Catatan Pengembalian</label>
+      <textarea class="fi" id="ret-note" rows="3" placeholder="Contoh: Semua barang dalam kondisi baik..." style="resize:vertical;min-height:80px;"></textarea>
+    </div>
+    <div class="fg">
+      <label class="fl">Foto Pengembalian (Opsional)</label>
+      <div id="ret-ph-wrap" style="display:flex;gap:10px;align-items:center;margin-top:4px;">
+        <button class="photo-btn" type="button" onclick="triggerRetPhoto()" style="width:64px;height:64px;flex-shrink:0;">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 15.2A3.2 3.2 0 0 1 8.8 12 3.2 3.2 0 0 1 12 8.8 3.2 3.2 0 0 1 15.2 12 3.2 3.2 0 0 1 12 15.2M12 7A5 5 0 0 0 7 12a5 5 0 0 0 5 5 5 5 0 0 0 5-5A5 5 0 0 0 12 7M0 5V21h24V5H17l-2-2H9L7 5H0Z"/></svg>
+          <span style="font-size:9px;">Foto</span>
+        </button>
+        <span style="font-size:12px;color:var(--text2)">Foto bukti pengembalian (opsional)</span>
+      </div>
+    </div>
+  `, [
+    { label:'Batal', cls:'btn-ghost', fn:'closeModal()' },
+    { label:'Kirim Pengembalian', cls:'btn-pri', fn:`submitReturn('${reqId}')` }
+  ]);
+}
+
+function triggerRetPhoto() { S.photoTarget = 'ret'; document.getElementById('fi-photo').click(); }
+
+function submitReturn(reqId) {
+  const cond = document.getElementById('ret-cond')?.value || 'ok';
+  const note = document.getElementById('ret-note')?.value.trim() || '';
+  const req = db.reqs.find(r => r.id===reqId); if (!req) return;
+  const now = new Date().toISOString();
+  req.st = 'returning';
+  req.retCond = cond;
+  req.retNote = note;
+  req.retPh   = retPhotoData;
+  req.retAt   = null;
+  db.logs.push({ id:uid(), rid:reqId, st:'returning', note:`Pengembalian diajukan — kondisi: ${cond==='ok'?'Baik':'Rusak'}`, at:now });
+  const myIds = JSON.parse(localStorage.getItem(ME_KEY)||'[]');
+  if (!myIds.includes(reqId)) { myIds.push(reqId); localStorage.setItem(ME_KEY, JSON.stringify(myIds)); }
+  save();
+  notifyServer({
+    type: 'return_new',
+    reqId: req.id,
+    nama: req.nama,
+    cond: cond,
+    note: note,
+    items: req.items.map(it => it.n)
+  });
+  toast('Pengembalian diajukan! Menunggu konfirmasi petugas. 🔄','ok');
+  closeModal();
+  renderHist();
+  renderReturn();
+  renderActiveBorrowed();
+}
+
+function confirmReturn(reqId) {
+  const req = db.reqs.find(r => r.id===reqId); if (!req) return;
+  const now = new Date().toISOString();
+  req.st = 'returned'; req.retAt = now;
+  db.logs.push({ id:uid(), rid:reqId, st:'returned', note:'Pengembalian dikonfirmasi petugas', at:now });
+  save();
+  notifyServer({
+    type: 'return_confirmed',
+    reqId: req.id,
+    nama: req.nama,
+    items: req.items.map(it => it.n)
+  });
+  toast('Pengembalian dikonfirmasi ✅','ok');
+  renderDash(); renderHist(); renderReturn(); renderActiveBorrowed();
+}
+
+function rejectReturn(reqId) {
+  const req = db.reqs.find(r => r.id===reqId); if (!req) return;
+  req.st = 'ok'; req.retNote=''; req.retCond=''; req.retPh=''; req.retAt=null;
+  db.logs.push({ id:uid(), rid:reqId, st:'ok', note:'Pengembalian ditolak — kembali ke status Disetujui', at:new Date().toISOString() });
+  save();
+  notifyServer({
+    type: 'return_rejected',
+    reqId: req.id,
+    nama: req.nama,
+    items: req.items.map(it => it.n)
+  });
+  toast('Pengembalian ditolak, status kembali ke Disetujui.');
+  renderDash(); renderHist(); renderReturn(); renderActiveBorrowed();
+}
+
+/* ─── PHASE 2: EXPORT EXCEL ──────────────────────────────── */
+function exportHistExcel() {
+  const myIds = JSON.parse(localStorage.getItem(ME_KEY)||'[]');
+  const myReqs = db.reqs.filter(r => myIds.includes(r.id));
+  if (!myReqs.length) { toast('Belum ada riwayat untuk diekspor.','err'); return; }
+  const rows = [['ID','Peminjam','PJ','Divisi','Tanggal','Status','Diajukan','Keputusan','Jml Barang','Nama Barang','Kode Barang','Kondisi Kembali','Catatan','Waktu Kembali']];
+  myReqs.forEach(r => rows.push([
+    r.id, r.nama, r.pjN, r.pjD, r.tgl, STLBL[r.st],
+    new Date(r.at).toLocaleString('id-ID'),
+    r.dec ? new Date(r.dec).toLocaleString('id-ID') : '-',
+    r.items.length, r.items.map(i=>i.n).join(', '), r.items.map(i=>i.k||'-').join(', '),
+    r.retCond ? (r.retCond==='ok'?'Baik':'Ada Kerusakan') : '-',
+    r.retNote || '-',
+    r.retAt ? new Date(r.retAt).toLocaleString('id-ID') : '-'
+  ]));
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = rows[0].map(()=>({wch:18}));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Riwayat');
+  XLSX.writeFile(wb, `riwayat_${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast('Riwayat diekspor ke Excel ✅','ok');
+}
+
+function exportDashExcel() {
+  if (!db.reqs.length) { toast('Belum ada data untuk diekspor.','err'); return; }
+  const rows = [['ID','Peminjam','PJ','Divisi','Tanggal','Status','Diajukan','Keputusan','Jml Barang','Nama Barang','Kode Barang','Kondisi Kembali','Catatan','Waktu Kembali']];
+  db.reqs.forEach(r => rows.push([
+    r.id, r.nama, r.pjN, r.pjD, r.tgl, STLBL[r.st],
+    new Date(r.at).toLocaleString('id-ID'),
+    r.dec ? new Date(r.dec).toLocaleString('id-ID') : '-',
+    r.items.length, r.items.map(i=>i.n).join(', '), r.items.map(i=>i.k||'-').join(', '),
+    r.retCond ? (r.retCond==='ok'?'Baik':'Ada Kerusakan') : '-',
+    r.retNote || '-',
+    r.retAt ? new Date(r.retAt).toLocaleString('id-ID') : '-'
+  ]));
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = rows[0].map(()=>({wch:18}));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Semua Pengajuan');
+  XLSX.writeFile(wb, `dashboard_${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast('Data dashboard diekspor ke Excel ✅','ok');
+}
+
+/* ─── PJ ─────────────────────────────────────────────────── */
+function renderPJ() {
+  const q = (document.getElementById('pj-search-list')?.value||'').toLowerCase();
+  const filtered = db.pj.filter(p =>
+    p.nama.toLowerCase().includes(q) || p.div.toLowerCase().includes(q)
+  );
+  const list = document.getElementById('pj-list');
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg><p>${db.pj.length?'Tidak ada hasil pencarian.':'Belum ada PJ.<br>Tambah manual atau impor Excel.'}</p></div>`;
+    return;
+  }
+  const groups = {};
+  filtered.forEach(p => { if (!groups[p.div]) groups[p.div]=[]; groups[p.div].push(p); });
+  let html = '';
+  Object.keys(groups).sort().forEach(div => {
+    html += `<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin:12px 0 6px;">${e(div)}</div>`;
+    html += `<div class="pj-grid">`;
+    groups[div].forEach(p => {
+      html += `<div class="pj-row">
+        <div class="pj-av">${e(p.nama.charAt(0).toUpperCase())}</div>
+        <div class="pj-inf"><div class="pj-name">${e(p.nama)}</div><div class="pj-div">${e(p.div)}</div></div>
+        <button class="btn btn-icon btn-sm" onclick="openPJModal('${p.id}')" title="Edit"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
+        <button class="btn btn-icon btn-sm" onclick="confirmDelPJ('${p.id}','${e(p.nama)}')" title="Hapus" style="color:var(--danger)"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  list.innerHTML = html;
+}
+
+function openPJModal(id=null) {
+  S.pjModalId = id;
+  const p = id ? db.pj.find(x => x.id===id) : null;
+  openModal(id?'Edit Penanggung Jawab':'Tambah Penanggung Jawab', `
+    <div class="fg"><label class="fl">Nama *</label><input class="fi" id="pj-n" type="text" placeholder="Nama lengkap" value="${e(p?.nama||'')}"></div>
+    <div class="fg"><label class="fl">Divisi / Kelas *</label><input class="fi" id="pj-d" type="text" placeholder="Contoh: Kelas XII RPL" value="${e(p?.div||'')}"></div>
+  `, [
+    { label:'Batal', cls:'btn-ghost', fn:'closeModal()' },
+    { label:id?'Simpan':'Tambah', cls:'btn-pri', fn:'savePJ()' }
+  ]);
+  setTimeout(() => document.getElementById('pj-n')?.focus(), 100);
+}
+
+function savePJ() {
+  const nama = document.getElementById('pj-n').value.trim();
+  const div  = document.getElementById('pj-d').value.trim();
+  if (!nama) { toast('Nama wajib diisi.','err'); return; }
+  if (!div)  { toast('Divisi/Kelas wajib diisi.','err'); return; }
+  if (S.pjModalId) {
+    const p = db.pj.find(x => x.id===S.pjModalId);
+    if (p) { p.nama=nama; p.div=div; }
+  } else { db.pj.push({ id:uid(), nama, div }); }
+  save();
+  toast(S.pjModalId?'PJ diperbarui.':'PJ ditambahkan.','ok');
+  closeModal(); renderPJ(); buildDD();
+}
+
+function confirmDelPJ(id, nama) {
+  openModal('Hapus Penanggung Jawab', `<p style="font-size:14px;">Yakin hapus <strong>${e(nama)}</strong>?<br><span style="font-size:12px;color:var(--text2);">Pengajuan yang sudah ada tidak terpengaruh.</span></p>`, [
+    { label:'Batal', cls:'btn-ghost', fn:'closeModal()' },
+    { label:'🗑 Hapus', cls:'btn-danger', fn:`delPJ('${id}')` }
+  ]);
+}
+
+function delPJ(id) {
+  db.pj = db.pj.filter(p => p.id!==id);
+  save(); toast('Penanggung jawab dihapus.'); closeModal(); renderPJ(); buildDD();
+}
+
+function importPJ(ev) {
+  const file = ev.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e2 => {
+    try {
+      const wb = XLSX.read(e2.target.result, { type:'binary' });
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header:1 });
+      let added = 0;
+      rows.slice(1).forEach(row => {
+        const nama=String(row[0]||'').trim(), div=String(row[1]||'').trim();
+        if (nama && div) { db.pj.push({ id:uid(), nama, div }); added++; }
+      });
+      save(); toast(`${added} PJ berhasil diimpor.`,'ok'); renderPJ(); buildDD();
+    } catch { toast('Gagal membaca file.','err'); }
+  };
+  reader.readAsBinaryString(file);
+  ev.target.value = '';
+}
+
+function dlTemplate() {
+  const ws = XLSX.utils.aoa_to_sheet([['Nama','Divisi/Kelas'],['Contoh Guru','Kelas XII RPL'],['Budi Santoso','Guru Tetap']]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Template PJ');
+  XLSX.writeFile(wb, 'template_pj.xlsx');
+}
+
+/* ─── SETTINGS ───────────────────────────────────────────── */
+function renderSettings() {
+  const sOrg = document.getElementById('s-org');
+  if (sOrg) {
+    sOrg.value = db.settings.org || '';
+    sOrg.disabled = !S.isAdmin;
+  }
+  const lp = document.getElementById('logo-prev');
+  const rb = document.getElementById('rm-logo-btn');
+  if (db.settings.logo) {
+    if (lp) lp.innerHTML = `<img src="${db.settings.logo}" style="width:60px;height:60px;border-radius:12px;object-fit:cover;border:2px solid var(--border);">`;
+    if (rb) rb.style.display = S.isAdmin ? 'block' : 'none';
+  } else {
+    if (lp) lp.innerHTML = `<div style="width:60px;height:60px;border-radius:12px;background:var(--surface2);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text2)">No logo</div>`;
+    if (rb) rb.style.display = 'none';
+  }
+  const dt = document.getElementById('dark-tog');
+  if (dt) dt.classList.toggle('on', !!db.settings.dark);
+
+  // Sinkronisasi status tombol mode tampilan Desktop vs HP
+  initViewMode();
+
+  // Banner peminjam selalu disembunyikan karena pengaturan hanya untuk petugas
+  const pBanner = document.getElementById('settings-peminjam-banner');
+  if (pBanner) pBanner.classList.add('hidden');
+
+  // Kontrol branding organisasi
+  const btnSave = document.getElementById('btn-save-settings');
+  if (btnSave) btnSave.disabled = !S.isAdmin;
+  const upLogoWrap = document.getElementById('btn-upload-logo-wrap');
+  if (upLogoWrap) upLogoWrap.style.display = S.isAdmin ? 'inline-flex' : 'none';
+  const fiLogo = document.getElementById('fi-logo-input');
+  if (fiLogo) fiLogo.disabled = !S.isAdmin;
+
+  // Kontrol password petugas
+  const cardPass = document.getElementById('card-password');
+  if (cardPass) {
+    cardPass.style.opacity = S.isAdmin ? '1' : '0.6';
+    const sNp = document.getElementById('s-np');
+    const sCp = document.getElementById('s-cp');
+    const btnPass = document.getElementById('btn-change-pass');
+    if (sNp) sNp.disabled = !S.isAdmin;
+    if (sCp) sCp.disabled = !S.isAdmin;
+    if (btnPass) btnPass.disabled = !S.isAdmin;
+  }
+
+  // Kontrol backup & restore
+  const cardBackup = document.getElementById('card-backup');
+  if (cardBackup) {
+    cardBackup.style.opacity = S.isAdmin ? '1' : '0.6';
+    const btnExp = document.getElementById('btn-export-json');
+    const wrapImp = document.getElementById('btn-import-wrap');
+    const fiImp = document.getElementById('fi-import-input');
+    if (btnExp) btnExp.disabled = !S.isAdmin;
+    if (wrapImp) wrapImp.style.display = S.isAdmin ? 'inline-flex' : 'none';
+    if (fiImp) fiImp.disabled = !S.isAdmin;
+  }
+
+  // Inisialisasi input laporan PDF
+  initReportForm();
+}
+
+async function uploadLogo(ev) {
+  const file = ev.target.files[0]; if (!file) return;
+  db.settings.logo = await shrink(file);
+  renderSettings(); applyBranding(); ev.target.value='';
+}
+function removeLogo() { db.settings.logo=''; renderSettings(); applyBranding(); }
+
+function saveSettings() {
+  db.settings.org = document.getElementById('s-org').value.trim() || 'BalikinGo';
+  save(); applyBranding(); toast('Pengaturan disimpan.','ok');
+}
+
+async function changePass() {
+  const np = document.getElementById('s-np').value;
+  const cp = document.getElementById('s-cp').value;
+  if (!np)           { toast('Password baru wajib diisi.','err'); return; }
+  if (np.length < 6) { toast('Password minimal 6 karakter.','err'); return; }
+  if (np !== cp)     { toast('Password tidak cocok.','err'); return; }
+  db.users[0].h = await sha256(np);
+  save(); toast('Password berhasil diubah!','ok');
+  document.getElementById('s-np').value='';
+  document.getElementById('s-cp').value='';
+}
+
+function exportData() {
+  const blob = new Blob([localStorage.getItem(DB_KEY)], { type:'application/json' });
+  const a = Object.assign(document.createElement('a'), {
+    href:URL.createObjectURL(blob),
+    download:`balikin_${new Date().toISOString().slice(0,10)}.json`
+  });
+  a.click(); URL.revokeObjectURL(a.href);
+  toast('Data diekspor.','ok');
+}
+
+function importData(ev) {
+  const file = ev.target.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = e2 => {
+    try {
+      const data = JSON.parse(e2.target.result);
+      if (!data.reqs || !data.pj) { toast('Format tidak valid.','err'); return; }
+      localStorage.setItem(DB_KEY, JSON.stringify(data)); db = data;
+      applyBranding(); renderDash(); renderPJ(); renderSettings(); renderActiveBorrowed(); renderReturn();
+      toast('Data berhasil diimpor.','ok');
+    } catch { toast('File tidak valid.','err'); }
+  };
+  r.readAsText(file);
+  ev.target.value='';
+}
+
+/* ─── MODAL ──────────────────────────────────────────────── */
+function openModal(title, body, actions=[]) {
+  document.getElementById('m-title').textContent = title;
+  document.getElementById('m-body').innerHTML = body;
+  document.getElementById('m-acts').innerHTML = actions.map(a =>
+    `<button class="btn ${a.cls} btn-full" onclick="${a.fn}">${a.label}</button>`
+  ).join('');
+  document.getElementById('overlay').classList.add('show');
+}
+function closeModalEv(ev) { if (ev.target===document.getElementById('overlay')) closeModal(); }
+function closeModal() { document.getElementById('overlay').classList.remove('show'); }
+window.closeModal = closeModal;
+window.savePJ = savePJ;
+window.delPJ = delPJ;
+window.decide = decide;
+window.confirmReturn = confirmReturn;
+window.rejectReturn = rejectReturn;
+window.goToLanding = goToLanding;
+window.goToLandingPetugas = goToLandingPetugas;
+window.showTab = showTab;
+window.togglePassVis = togglePassVis;
+window.testNotification = testNotification;
+window.requestNotifPermission = requestNotifPermission;
+window.dismissNotifBanner = dismissNotifBanner;
+window.switchLTab = switchLTab;
+window.enterBorrower = enterBorrower;
+window.doLogin = doLogin;
+window.doLogout = doLogout;
+window.triggerBorrowerPhoto = triggerBorrowerPhoto;
+window.onPhotoUser = onPhotoUser;
+window.removeBorrowerPhoto = removeBorrowerPhoto;
+window.renderBorrowerPhoto = renderBorrowerPhoto;
+
+/* ─── PDF REPORT GENERATOR (HARIAN, MINGGUAN, BULANAN, TOOLMAN) ── */
+let repPeriod = 'daily';
+
+function initReportForm() {
+  const today = new Date().toISOString().slice(0, 10);
+  const currentMonth = today.slice(0, 7);
+  
+  const dailyInput = document.getElementById('rep-input-daily');
+  if (dailyInput && !dailyInput.value) dailyInput.value = today;
+  
+  const weeklyInput = document.getElementById('rep-input-weekly');
+  if (weeklyInput && !weeklyInput.value) weeklyInput.value = today;
+  
+  const monthlyInput = document.getElementById('rep-input-monthly');
+  if (monthlyInput && !monthlyInput.value) monthlyInput.value = currentMonth;
+  
+  const toolmanInput = document.getElementById('rep-toolman');
+  if (toolmanInput && !toolmanInput.value) {
+    toolmanInput.value = (db.settings && db.settings.toolman) || localStorage.getItem('pinjam_toolman') || 'Budi Santoso (Toolman Lab)';
+  }
+
+  const prodiInput = document.getElementById('rep-prodi');
+  if (prodiInput && !prodiInput.value) {
+    prodiInput.value = (db.settings && db.settings.prodi) || localStorage.getItem('pinjam_prodi') || 'Broadcasting dan Perfilman';
+  }
+
+  updateWeeklyHint();
+}
+
+function setRepPeriod(p) {
+  repPeriod = p;
+  const btns = { daily: 'rbtn-daily', weekly: 'rbtn-weekly', monthly: 'rbtn-monthly', all: 'rbtn-all' };
+  Object.keys(btns).forEach(k => {
+    const b = document.getElementById(btns[k]);
+    if (b) {
+      b.classList.toggle('btn-pri', k === p);
+      b.classList.toggle('btn-ghost', k !== p);
+    }
+  });
+
+  const wrapDaily = document.getElementById('rep-wrap-daily');
+  const wrapWeekly = document.getElementById('rep-wrap-weekly');
+  const wrapMonthly = document.getElementById('rep-wrap-monthly');
+  
+  if (wrapDaily) wrapDaily.classList.toggle('hidden', p !== 'daily');
+  if (wrapWeekly) wrapWeekly.classList.toggle('hidden', p !== 'weekly');
+  if (wrapMonthly) wrapMonthly.classList.toggle('hidden', p !== 'monthly');
+
+  if (p === 'weekly') updateWeeklyHint();
+}
+
+function getWeekRange(dateStr) {
+  if (!dateStr) dateStr = new Date().toISOString().slice(0, 10);
+  const d = new Date(dateStr + 'T00:00:00');
+  const day = d.getDay();
+  const diffToMon = (day === 0 ? -6 : 1) - day;
+  const mon = new Date(d); mon.setDate(d.getDate() + diffToMon);
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  return {
+    start: mon.toISOString().slice(0, 10),
+    end: sun.toISOString().slice(0, 10)
+  };
+}
+
+function updateWeeklyHint() {
+  const el = document.getElementById('rep-weekly-hint');
+  const input = document.getElementById('rep-input-weekly');
+  if (!el || !input) return;
+  const range = getWeekRange(input.value);
+  el.textContent = `Rentang: ${formatTglIndo(range.start)} s/d ${formatTglIndo(range.end)}`;
+}
+
+function saveToolmanName(name) {
+  try {
+    localStorage.setItem('pinjam_toolman', name);
+    if (db && db.settings) {
+      db.settings.toolman = name;
+      save();
+    }
+  } catch(e) {}
+}
+
+function saveProdiName(name) {
+  try {
+    localStorage.setItem('pinjam_prodi', name);
+    if (db && db.settings) {
+      db.settings.prodi = name;
+      save();
+    }
+  } catch(e) {}
+}
+
+function formatTglIndo(isoStr) {
+  if (!isoStr) return '-';
+  const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const parts = isoStr.split('-');
+  if (parts.length === 3) {
+    const d = parseInt(parts[2], 10);
+    const m = months[parseInt(parts[1], 10) - 1];
+    const y = parts[0];
+    return `${d} ${m} ${y}`;
+  }
+  return isoStr;
+}
+
+function formatBulanIndo(ymStr) {
+  if (!ymStr) return '-';
+  const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const parts = ymStr.split('-');
+  if (parts.length >= 2) {
+    const m = months[parseInt(parts[1], 10) - 1];
+    const y = parts[0];
+    return `${m} ${y}`;
+  }
+  return ymStr;
+}
+
+function generatePdfReport(isPrintPreview = false) {
+  if (!S.isAdmin) {
+    toast('Hanya petugas / admin yang berwenang mencetak laporan.', 'err');
+    return;
+  }
+
+  const statusFilter = document.getElementById('rep-status')?.value || 'all';
+  const toolmanName = (document.getElementById('rep-toolman')?.value || '').trim() || (db.settings && db.settings.toolman) || localStorage.getItem('pinjam_toolman') || 'Toolman Laboratorium';
+  const prodiRaw = (document.getElementById('rep-prodi')?.value || '').trim() || (db.settings && db.settings.prodi) || localStorage.getItem('pinjam_prodi') || 'Broadcasting dan Perfilman';
+  const prodiLabel = prodiRaw.toLowerCase().startsWith('program keahlian') ? prodiRaw : `Program Keahlian ${prodiRaw}`;
+  const orgName = (db.settings && db.settings.org) ? db.settings.org : 'BalikinGo';
+  
+  let periodTitle = '';
+  let filenamePeriod = repPeriod;
+  let filtered = [...(db.reqs || [])];
+
+  if (repPeriod === 'daily') {
+    const dateVal = document.getElementById('rep-input-daily')?.value || new Date().toISOString().slice(0, 10);
+    filtered = filtered.filter(r => r.tgl === dateVal || (r.at && r.at.slice(0, 10) === dateVal));
+    periodTitle = `Laporan Harian (${formatTglIndo(dateVal)})`;
+    filenamePeriod = `harian_${dateVal}`;
+  } else if (repPeriod === 'weekly') {
+    const refDate = document.getElementById('rep-input-weekly')?.value || new Date().toISOString().slice(0, 10);
+    const range = getWeekRange(refDate);
+    filtered = filtered.filter(r => (r.tgl >= range.start && r.tgl <= range.end) || (r.at && r.at.slice(0, 10) >= range.start && r.at.slice(0, 10) <= range.end));
+    periodTitle = `Laporan Mingguan (${formatTglIndo(range.start)} s/d ${formatTglIndo(range.end)})`;
+    filenamePeriod = `mingguan_${range.start}_sd_${range.end}`;
+  } else if (repPeriod === 'monthly') {
+    const monthVal = document.getElementById('rep-input-monthly')?.value || new Date().toISOString().slice(0, 7);
+    filtered = filtered.filter(r => (r.tgl && r.tgl.startsWith(monthVal)) || (r.at && r.at.startsWith(monthVal)));
+    periodTitle = `Laporan Bulanan (${formatBulanIndo(monthVal)})`;
+    filenamePeriod = `bulanan_${monthVal}`;
+  } else {
+    periodTitle = 'Laporan Keseluruhan Transaksi Peminjaman & Pengembalian';
+    filenamePeriod = 'semua_periode';
+  }
+
+  // Filter status jika dipilih
+  if (statusFilter === 'returned') {
+    filtered = filtered.filter(r => r.st === 'returned');
+  } else if (statusFilter === 'active') {
+    filtered = filtered.filter(r => r.st === 'ok' || r.st === 'returning');
+  } else if (statusFilter === 'wait') {
+    filtered = filtered.filter(r => r.st === 'wait');
+  }
+
+  // Urutkan kronologis
+  filtered.sort((a, b) => (a.tgl || '').localeCompare(b.tgl || '') || new Date(a.at) - new Date(b.at));
+
+  const totalTx = filtered.length;
+  const totalItems = filtered.reduce((acc, r) => acc + (r.items ? r.items.length : 0), 0);
+  const returnedCount = filtered.filter(r => r.st === 'returned').length;
+  const activeCount = filtered.filter(r => r.st === 'ok' || r.st === 'returning').length;
+  const waitCount = filtered.filter(r => r.st === 'wait').length;
+  const brokenCount = filtered.filter(r => r.retCond === 'rusak').length;
+
+  if (totalTx === 0 && !isPrintPreview) {
+    toast('Tidak ada transaksi peminjaman/pengembalian pada periode ini.', 'err');
+    return;
+  }
+
+  // Persiapkan baris tabel
+  const tableRows = filtered.map((r, idx) => {
+    const itemsText = (r.items || []).map((it, i) => `${i+1}. ${it.n}${it.k ? ' ['+it.k+']' : ''}`).join('\n');
+    let statusText = STLBL[r.st] || r.st;
+    if (r.st === 'ok') statusText = '⏳ Dipinjam';
+    else if (r.st === 'returning') statusText = '🔄 Proses Kembali';
+    else if (r.st === 'returned') statusText = '📦 Selesai';
+    else if (r.st === 'wait') statusText = '⏳ Menunggu';
+    else if (r.st === 'no') statusText = '❌ Ditolak';
+
+    let retInfo = '-';
+    if (r.st === 'returned') {
+      const cond = r.retCond === 'ok' ? '✅ Baik' : '⚠️ Ada Kerusakan';
+      retInfo = `${formatTglIndo(r.retAt ? r.retAt.slice(0, 10) : r.tgl)}\nKondisi: ${cond}${r.retNote ? '\nCatatan: ' + r.retNote : ''}`;
+    } else if (r.st === 'returning') {
+      const cond = r.retCond === 'ok' ? 'Baik' : '⚠️ Rusak';
+      retInfo = `Menunggu Verifikasi\nKondisi: ${cond}${r.retNote ? '\nCatatan: ' + r.retNote : ''}`;
+    } else if (r.st === 'ok') {
+      retInfo = 'Sedang Dipinjam';
+    }
+
+    return [
+      (idx + 1).toString(),
+      formatTglIndo(r.tgl),
+      r.nama || '-',
+      `${r.pjN || '-'} (${r.pjD || '-'})`,
+      itemsText || '-',
+      statusText,
+      retInfo
+    ];
+  });
+
+  const currentDateIndo = formatTglIndo(new Date().toISOString().slice(0, 10));
+
+  // 1. JIKA MODE UNDUH PDF LANGSUNG (jsPDF + autoTable)
+  if (!isPrintPreview && window.jspdf && window.jspdf.jsPDF) {
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      // Header Laporan (Kop Laporan - Rata Tengah / Center)
+      const kopCenterX = 148.5; // Titik tengah kertas A4 Landscape (lebar 297mm / 2 = 148.5mm)
+
+      // Baris 1: Laporan Peminjaman dan Pengembalian Alat (Center)
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14.5);
+      doc.setTextColor(30, 27, 75);
+      doc.text('Laporan Peminjaman dan Pengembalian Alat', kopCenterX, 14.5, { align: 'center' });
+
+      // Baris 2 (enter): Program Keahlian (Custom dari input menu setting - Center)
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11.5);
+      doc.setTextColor(79, 70, 229);
+      doc.text(prodiLabel.toUpperCase(), kopCenterX, 21, { align: 'center' });
+
+      // Baris 3: Periode & Tanggal Cetak (Center)
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(100, 116, 139);
+      const orgPrefix = orgName && orgName !== 'BalikinGo' ? `${orgName}  |  ` : '';
+      doc.text(`${orgPrefix}Periode: ${periodTitle}   |   Dicetak: ${currentDateIndo}, ${new Date().toLocaleTimeString('id-ID')} WIB`, kopCenterX, 26.5, { align: 'center' });
+
+      // Garis kop pemisah ganda
+      doc.setDrawColor(99, 102, 241);
+      doc.setLineWidth(0.6);
+      doc.line(14, 30, 283, 30);
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.2);
+      doc.line(14, 31, 283, 31);
+
+      // Ringkasan Statistik Eksekutif (4 kotak metrik)
+      const boxW = 63.5;
+      const boxH = 10;
+      const boxY = 33;
+      const metrics = [
+        { label: 'Total Peminjaman', val: `${totalTx} Transaksi`, color: [79, 70, 229] },
+        { label: 'Total Unit Alat', val: `${totalItems} Unit`, color: [59, 130, 246] },
+        { label: 'Sudah Dikembalikan', val: `${returnedCount} Selesai (${brokenCount} rusak)`, color: [16, 185, 129] },
+        { label: 'Belum Kembali / Aktif', val: `${activeCount} Sedang Dipinjam`, color: [245, 158, 11] }
+      ];
+
+      metrics.forEach((m, idx) => {
+        const bx = 14 + idx * (boxW + 3);
+        doc.setFillColor(248, 250, 252);
+        doc.setDrawColor(226, 232, 240);
+        doc.roundedRect(bx, boxY, boxW, boxH, 1.5, 1.5, 'FD');
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(100, 116, 139);
+        doc.text(m.label, bx + 3, boxY + 4);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(m.color[0], m.color[1], m.color[2]);
+        doc.text(m.val, bx + 3, boxY + 8);
+      });
+
+      // Tabel Data Menggunakan AutoTable
+      doc.autoTable({
+        startY: 46,
+        head: [['No', 'Tgl Pinjam', 'Peminjam', 'Penanggung Jawab', 'Daftar Barang & Kode', 'Status', 'Pengembalian & Kondisi']],
+        body: tableRows.length ? tableRows : [['-', '-', 'Tidak ada data peminjaman pada periode ini.', '-', '-', '-', '-']],
+        theme: 'grid',
+        headStyles: {
+          fillColor: [79, 70, 229],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          fontSize: 8.5,
+          halign: 'center',
+          cellPadding: 2.2
+        },
+        bodyStyles: {
+          fontSize: 8,
+          textColor: [30, 41, 59],
+          cellPadding: 2,
+          valign: 'top',
+          lineColor: [226, 232, 240]
+        },
+        columnStyles: {
+          0: { cellWidth: 10, halign: 'center' },
+          1: { cellWidth: 26, halign: 'center' },
+          2: { cellWidth: 38 },
+          3: { cellWidth: 42 },
+          4: { cellWidth: 68 },
+          5: { cellWidth: 32, halign: 'center' },
+          6: { cellWidth: 53 }
+        },
+        alternateRowStyles: {
+          fillColor: [248, 250, 252]
+        },
+        margin: { left: 14, right: 14 },
+        didDrawPage: function(data) {
+          const pageCount = doc.internal.getNumberOfPages();
+          doc.setFont('helvetica', 'italic');
+          doc.setFontSize(7.5);
+          doc.setTextColor(148, 163, 184);
+          doc.text(`* BalikinGo Sistem Peminjaman Alat — ${orgName}`, 14, 204);
+          doc.setFont('helvetica', 'normal');
+          doc.text(`Halaman ${doc.internal.getCurrentPageInfo().pageNumber} dari ${pageCount}`, 283, 204, { align: 'right' });
+        }
+      });
+
+      // Tanda Tangan Toolman di Bagian Bawah Laporan
+      let finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY : 120;
+      if (finalY + 44 > 198) {
+        doc.addPage();
+        finalY = 20;
+      } else {
+        finalY += 8;
+      }
+
+      const sigCenterX = 236;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(30, 41, 59);
+      doc.text(`${currentDateIndo}`, sigCenterX, finalY, { align: 'center' });
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text('Mengetahui,', sigCenterX, finalY + 5, { align: 'center' });
+      doc.text('Toolman / Petugas Peralatan', sigCenterX, finalY + 9.5, { align: 'center' });
+
+      // Ruang Tanda Tangan
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9.5);
+      doc.text(`( ${toolmanName} )`, sigCenterX, finalY + 31, { align: 'center' });
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Pengelola Alat & Laboratorium', sigCenterX, finalY + 35, { align: 'center' });
+
+      // Unduh file PDF
+      const pdfFileName = `Laporan_Peminjaman_${filenamePeriod}_${Date.now().toString().slice(-6)}.pdf`;
+      doc.save(pdfFileName);
+      toast('Laporan PDF berhasil diunduh! 📄', 'ok');
+      return;
+    } catch(err) {
+      console.warn('Gagal generate via jsPDF, beralih ke pratinjau cetak:', err);
+    }
+  }
+
+  // 2. PRATINJAU CETAK (PRINT PREVIEW DENGAN DUKUNGAN SAVE AS PDF BROWSER)
+  printReportHtml({
+    orgName,
+    prodiLabel,
+    prodiRaw,
+    periodTitle,
+    currentDateIndo,
+    totalTx,
+    totalItems,
+    returnedCount,
+    activeCount,
+    brokenCount,
+    tableRows,
+    toolmanName
+  });
+}
+
+function printReportHtml(data) {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    toast('Popup diblokir peramban. Izinkan popup untuk mencetak laporan.', 'err');
+    return;
+  }
+
+  const rowsHtml = data.tableRows.length ? data.tableRows.map(r => `
+    <tr>
+      <td style="text-align:center;">${e(r[0])}</td>
+      <td style="text-align:center;">${e(r[1])}</td>
+      <td><strong>${e(r[2])}</strong></td>
+      <td>${e(r[3])}</td>
+      <td style="white-space:pre-line;">${e(r[4])}</td>
+      <td style="text-align:center;"><span class="badge-status">${e(r[5])}</span></td>
+      <td style="white-space:pre-line;font-size:11px;">${e(r[6])}</td>
+    </tr>
+  `).join('') : `<tr><td colspan="7" style="text-align:center;padding:24px;">Tidak ada data peminjaman pada periode ini.</td></tr>`;
+
+  printWindow.document.write(`<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Laporan Peminjaman Alat — ${e(data.orgName)}</title>
+  <style>
+    @page { size: A4 landscape; margin: 12mm; }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #1e293b; background: #fff; margin: 0; padding: 12px; }
+    .header { border-bottom: 2px solid #4f46e5; padding-bottom: 8px; margin-bottom: 12px; text-align: center; }
+    .kop-main { font-size: 19px; font-weight: 800; color: #1e1b4b; margin: 0 0 2px 0; text-align: center; }
+    .kop-prodi { font-size: 13.5px; font-weight: 700; color: #4f46e5; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
+    .kop-sub { font-size: 11px; color: #64748b; margin: 0; text-align: center; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+    .stat-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px; }
+    .stat-label { font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 600; }
+    .stat-val { font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px; }
+    table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 18px; }
+    th { background: #4f46e5; color: #fff; font-weight: 700; text-align: left; padding: 7px 8px; border: 1px solid #4338ca; }
+    td { padding: 6px 8px; border: 1px solid #e2e8f0; vertical-align: top; }
+    tr:nth-child(even) { background: #f8fafc; }
+    .badge-status { font-size: 10px; font-weight: 600; }
+    .footer-section { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 16px; page-break-inside: avoid; }
+    .footer-note { font-size: 10px; color: #94a3b8; font-style: italic; }
+    .sig-box { text-align: center; width: 240px; }
+    .sig-space { height: 60px; }
+    .sig-name { font-weight: 700; font-size: 12px; border-bottom: 1px solid #1e293b; display: inline-block; padding-bottom: 2px; }
+    .sig-role { font-size: 10px; color: #64748b; margin-top: 3px; }
+    .no-print-bar { background: #1e1b4b; color: #fff; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; margin-bottom: 16px; }
+    @media print {
+      .no-print-bar { display: none !important; }
+      body { padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print-bar">
+    <div><strong>Pratinjau Laporan PDF</strong> — Anda dapat langsung mencetak atau memilih "Simpan sebagai PDF"</div>
+    <div>
+      <button onclick="window.print()" style="background:#4f46e5;color:#fff;border:none;padding:7px 14px;border-radius:6px;font-weight:600;cursor:pointer;">🖨️ Cetak / Simpan PDF</button>
+      <button onclick="window.close()" style="background:transparent;color:#cbd5e1;border:1px solid #475569;padding:7px 12px;border-radius:6px;margin-left:6px;cursor:pointer;">✕ Tutup</button>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="kop-main">Laporan Peminjaman dan Pengembalian Alat</div>
+    <div class="kop-prodi">${e(data.prodiLabel)}</div>
+    <div class="kop-sub">${e(data.orgName && data.orgName !== 'BalikinGo' ? data.orgName + ' • ' : '')}Periode: ${e(data.periodTitle)} &bull; Tanggal Cetak: ${e(data.currentDateIndo)} WIB</div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-label">Total Peminjaman</div><div class="stat-val">${data.totalTx} Transaksi</div></div>
+    <div class="stat-card"><div class="stat-label">Total Unit Alat</div><div class="stat-val">${data.totalItems} Unit</div></div>
+    <div class="stat-card"><div class="stat-label">Sudah Dikembalikan</div><div class="stat-val" style="color:#059669;">${data.returnedCount} Selesai (${data.brokenCount} rusak)</div></div>
+    <div class="stat-card"><div class="stat-label">Belum Kembali / Aktif</div><div class="stat-val" style="color:#d97706;">${data.activeCount} Sedang Dipinjam</div></div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:30px;text-align:center;">No</th>
+        <th style="width:90px;text-align:center;">Tgl Pinjam</th>
+        <th style="width:130px;">Peminjam</th>
+        <th style="width:130px;">Penanggung Jawab</th>
+        <th>Daftar Barang &amp; Kode</th>
+        <th style="width:105px;text-align:center;">Status</th>
+        <th style="width:160px;">Pengembalian &amp; Kondisi</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rowsHtml}
+    </tbody>
+  </table>
+
+  <div class="footer-section">
+    <div class="footer-note">
+      * Dokumen resmi yang digenerate oleh Sistem BalikinGo pada ${new Date().toLocaleString('id-ID')} WIB.<br>
+      Digunakan untuk keperluan audit inventaris dan arsip laboratorium.
+    </div>
+    <div class="sig-box">
+      <div>${e(data.currentDateIndo)}</div>
+      <div style="font-weight:700;margin-top:2px;">Mengetahui,</div>
+      <div>Toolman / Petugas Peralatan</div>
+      <div class="sig-space"></div>
+      <div class="sig-name">( ${e(data.toolmanName)} )</div>
+      <div class="sig-role">Pengelola Alat &amp; Laboratorium</div>
+    </div>
+  </div>
+</body>
+</html>`);
+  printWindow.document.close();
+}
+
+window.setRepPeriod = setRepPeriod;
+window.updateWeeklyHint = updateWeeklyHint;
+window.saveToolmanName = saveToolmanName;
+window.saveProdiName = saveProdiName;
+window.generatePdfReport = generatePdfReport;
+window.setViewMode = setViewMode;
+window.toggleViewMode = toggleViewMode;
+window.applyViewMode = applyViewMode;
+window.setHistFilter = setHistFilter;
+window.setHistStatusF = setHistStatusF;
+window.openHpConnectModal = openHpConnectModal;
+window.copyTextToClipboard = copyTextToClipboard;
+
+/* ─── LIGHTBOX ───────────────────────────────────────────── */
+function openLbx(src) { document.getElementById('lbx-img').src=src; document.getElementById('lbx').classList.add('show'); }
+function closeLbx() { document.getElementById('lbx').classList.remove('show'); }
+
+/* ─── BOOT ───────────────────────────────────────────────── */
+async function init() {
+  initViewMode();
+  await load();
+  applyBranding();
+  checkNotifPermissionBanner();
+
+  // Buka kunci Web Audio API pada interaksi pertama di HP / Desktop
+  const unlockAudio = () => {
+    AudioNotif.init();
+    document.removeEventListener('pointerdown', unlockAudio);
+    document.removeEventListener('keydown', unlockAudio);
+  };
+  document.addEventListener('pointerdown', unlockAudio, { passive: true });
+  document.addEventListener('keydown', unlockAudio, { passive: true });
+
+  // Mulai sinkronisasi dan notifikasi otomatis real-time (1.5 detik agar respon HP <-> Laptop instan)
+  checkSync();
+  setInterval(checkSync, 1500);
+  window.addEventListener('focus', () => checkSync());
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) checkSync();
+  });
+
+  if (localStorage.getItem(SESS_KEY)==='1') { S.isAdmin=true; showApp(); return; }
+  document.getElementById('login-screen').style.display='flex';
+}
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(reg => reg.update()).catch(()=>{});
+  });
+}
+if ('caches' in window) {
+  caches.keys().then(keys => keys.filter(k => k !== 'pinjam-v19').forEach(k => caches.delete(k)));
+}
+
+init();
+</script>
+</body>
+</html>

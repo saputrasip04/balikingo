@@ -1,0 +1,21 @@
+{
+  "name": "BalikinGo",
+  "short_name": "BalikinGo",
+  "description": "Sistem peminjaman alat broadcasting dan perfilman",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f4ff",
+  "theme_color": "#6366f1",
+  "lang": "id",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%236366f1'/><path d='M70 45h-20v20h20v-20zM65 5v10H35V5H25v10H20C15 15 11 19 11 24v60c0 5 4 9 9 9h60c5 0 9-4 9-9V24c0-5-4-9-9-9h-5V5H65zM80 84H20V39h60v45z' fill='white'/></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"]
+}

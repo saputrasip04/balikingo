@@ -1,0 +1,31 @@
+# Fase 2+3 sudah aktif — gunakan docker-compose ini HANYA setelah virtualisasi BIOS diaktifkan
+
+services:
+
+  # Frontend (nginx)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: balikin-frontend
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+  # Backend (Node.js + SQLite)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: balikin-backend
+    ports:
+      - "3001:3001"
+    volumes:
+      - backend_data:/app/data
+    environment:
+      - PORT=3001
+      - JWT_SECRET=ganti-ini-dengan-secret-kuat-anda
+    restart: unless-stopped
+
+volumes:
+  backend_data:
