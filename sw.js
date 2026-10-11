@@ -1,4 +1,4 @@
-const C = 'pinjam-v20';
+const C = 'pinjam-v21';
 const ASSETS = [
   './',
   './index.html',

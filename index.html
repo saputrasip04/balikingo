@@ -7,10 +7,10 @@
   <meta name="description" content="Sistem peminjaman alat broadcasting dan perfilman">
   <title>BalikinGo — Peminjaman Alat</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" type="image/svg+xml" href="icon.svg">
-  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-  <link rel="shortcut icon" href="icon-192.png">
-  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="icon.svg?v=21">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=21">
+  <link rel="shortcut icon" href="icon-192.png?v=21">
+  <link rel="apple-touch-icon" href="icon-192.png?v=21">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script>
@@ -978,7 +978,7 @@
 <!-- ═══ LOGIN ══════════════════════════════════════════ -->
 <div id="login-screen">
   <div class="login-logo" id="login-logo-box">
-    <img src="logo.svg" alt="BalikinGo Logo" style="width:100%;height:100%;object-fit:cover;">
+    <img src="logo.svg?v=21" alt="BalikinGo Logo" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.src='icon-512.png';">
   </div>
   <div class="login-org" id="login-org">BalikinGo</div>
   <div class="login-sub">Sistem Peminjaman Alat Broadcasting &amp; Perfilman</div>
@@ -1014,7 +1014,7 @@
 <!-- ═══ APP ════════════════════════════════════════════ -->
 <div id="app" class="hidden">
   <header id="hdr">
-    <div id="hdr-logo-ph"><img src="icon.svg" alt="BalikinGo" style="width:100%;height:100%;object-fit:cover;"></div>
+    <div id="hdr-logo-ph"><img src="icon.svg?v=21" alt="BalikinGo" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.src='icon-192.png';"></div>
     <img id="hdr-logo" class="hidden" alt="logo">
     <div id="hdr-title">
       <div style="display:flex;align-items:center;gap:6px;">
@@ -1484,6 +1484,17 @@ async function load() {
     db.v = 2;
     save();
   }
+  // ── MIGRATION v2 → v3: Reset stale test logo so new official BalikinGo logo takes effect ──
+  if (!db.v || db.v < 3) {
+    if (db.settings && db.settings.logo && (
+        db.settings.logo.startsWith('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUND') ||
+        db.settings.logo.length > 50000
+    )) {
+      db.settings.logo = '';
+    }
+    db.v = 3;
+    save();
+  }
 }
 
 function mergeServerDb(serverDb) {
@@ -1491,7 +1502,15 @@ function mergeServerDb(serverDb) {
   if (!db) { db = serverDb; return; }
 
   // Settings
-  if (serverDb.settings) db.settings = Object.assign({}, db.settings, serverDb.settings);
+  if (serverDb.settings) {
+    if (serverDb.settings.logo && (
+        serverDb.settings.logo.startsWith('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUND') ||
+        serverDb.settings.logo.length > 50000
+    )) {
+      serverDb.settings.logo = '';
+    }
+    db.settings = Object.assign({}, db.settings, serverDb.settings);
+  }
   if (serverDb.users && serverDb.users.length) db.users = serverDb.users;
   
   // PJ
@@ -2446,14 +2465,17 @@ function applyBranding() {
   } else {
     hLogo.classList.add('hidden');
     hPh.classList.remove('hidden');
-    hPh.innerHTML = `<img src="icon.svg" style="width:100%;height:100%;object-fit:cover;" alt="BalikinGo">`;
+    hPh.innerHTML = `<img src="icon.svg?v=21" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.src='icon-192.png';" alt="BalikinGo">`;
   }
   const lOrg = document.getElementById('login-org');
   if (lOrg) lOrg.textContent = org || 'BalikinGo';
   const lBox = document.getElementById('login-logo-box');
   if (lBox) {
-    if (logo) lBox.innerHTML = `<img src="${logo}" style="width:100%;height:100%;object-fit:cover;" alt="logo">`;
-    else lBox.innerHTML = `<img src="logo.svg" style="width:100%;height:100%;object-fit:cover;" alt="BalikinGo Logo">`;
+    if (logo) {
+      lBox.innerHTML = `<img src="${logo}" style="width:100%;height:100%;object-fit:cover;" alt="logo">`;
+    } else {
+      lBox.innerHTML = `<img src="logo.svg?v=21" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.src='icon-512.png';" alt="BalikinGo Logo">`;
+    }
   }
   applyDark(db.settings.dark);
 }
@@ -3517,7 +3539,7 @@ function renderSettings() {
     if (lp) lp.innerHTML = `<img src="${db.settings.logo}" style="width:60px;height:60px;border-radius:12px;object-fit:cover;border:2px solid var(--border);">`;
     if (rb) rb.style.display = S.isAdmin ? 'block' : 'none';
   } else {
-    if (lp) lp.innerHTML = `<div style="width:60px;height:60px;border-radius:12px;background:var(--surface2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;" title="Logo Bawaan (Default)"><img src="logo.svg" style="width:100%;height:100%;object-fit:cover;"></div>`;
+    if (lp) lp.innerHTML = `<div style="width:60px;height:60px;border-radius:12px;background:var(--surface2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;" title="Logo Bawaan (Default)"><img src="logo.svg?v=21" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.src='icon-192.png';"></div>`;
     if (rb) rb.style.display = 'none';
   }
   const dt = document.getElementById('dark-tog');
@@ -4216,11 +4238,11 @@ async function init() {
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').then(reg => reg.update()).catch(()=>{});
+    navigator.serviceWorker.register('sw.js?v=21').then(reg => reg.update()).catch(()=>{});
   });
 }
 if ('caches' in window) {
-  caches.keys().then(keys => keys.filter(k => k !== 'pinjam-v19').forEach(k => caches.delete(k)));
+  caches.keys().then(keys => keys.filter(k => k !== 'pinjam-v21').forEach(k => caches.delete(k)));
 }
 
 init();
