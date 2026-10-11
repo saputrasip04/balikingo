@@ -1,8 +1,12 @@
-const C = 'pinjam-v19';
+const C = 'pinjam-v20';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './icon.svg',
+  './logo.svg',
+  './icon-192.png',
+  './icon-512.png',
   './vendor/jspdf.umd.min.js',
   './vendor/jspdf.plugin.autotable.min.js',
   './vendor/qrcode.min.js',

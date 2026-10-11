@@ -7,8 +7,10 @@
   <meta name="description" content="Sistem peminjaman alat broadcasting dan perfilman">
   <title>BalikinGo — Peminjaman Alat</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%236366f1'/><path d='M22 13h-6v6h6v-6zM21 4v3H11V4H9v3H8C6.34 7 5 8.34 5 10v16c0 1.66 1.34 3 3 3h16c1.66 0 3-1.34 3-3V10c0-1.66-1.34-3-3-3h-1V4h-2zm3 22H8V14h16v12z' fill='white'/></svg>">
-  <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%236366f1'/><path d='M22 13h-6v6h6v-6zM21 4v3H11V4H9v3H8C6.34 7 5 8.34 5 10v16c0 1.66 1.34 3 3 3h16c1.66 0 3-1.34 3-3V10c0-1.66-1.34-3-3-3h-1V4h-2zm3 22H8V14h16v12z' fill='white'/></svg>">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="shortcut icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script>
@@ -57,8 +59,9 @@
 
     /* Header */
     #hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm);}
-    #hdr-logo-ph{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--primary),var(--pri-dk));display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    #hdr-logo-ph{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--primary),var(--pri-dk));display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
     #hdr-logo-ph svg{width:20px;height:20px;fill:white;}
+    #hdr-logo-ph img{width:100%;height:100%;object-fit:cover;}
     #hdr-logo{width:36px;height:36px;border-radius:9px;object-fit:cover;flex-shrink:0;}
     #hdr-title{flex:1;min-width:0;}
     #hdr-title h1{font-size:15px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -975,7 +978,7 @@
 <!-- ═══ LOGIN ══════════════════════════════════════════ -->
 <div id="login-screen">
   <div class="login-logo" id="login-logo-box">
-    <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+    <img src="logo.svg" alt="BalikinGo Logo" style="width:100%;height:100%;object-fit:cover;">
   </div>
   <div class="login-org" id="login-org">BalikinGo</div>
   <div class="login-sub">Sistem Peminjaman Alat Broadcasting &amp; Perfilman</div>
@@ -1011,7 +1014,7 @@
 <!-- ═══ APP ════════════════════════════════════════════ -->
 <div id="app" class="hidden">
   <header id="hdr">
-    <div id="hdr-logo-ph"><svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div>
+    <div id="hdr-logo-ph"><img src="icon.svg" alt="BalikinGo" style="width:100%;height:100%;object-fit:cover;"></div>
     <img id="hdr-logo" class="hidden" alt="logo">
     <div id="hdr-title">
       <div style="display:flex;align-items:center;gap:6px;">
@@ -1216,15 +1219,23 @@
 
       <div class="desktop-settings-grid">
         <div class="card" id="card-branding">
-          <div class="card-title">🏢 Branding Organisasi</div>
+          <div class="card-title">🏢 Branding Organisasi &amp; Logo</div>
           <div class="fg"><label class="fl">Nama Organisasi</label><input class="fi" id="s-org" type="text" placeholder="Nama organisasi..."></div>
           <div class="fg">
-            <label class="fl">Logo</label>
-            <div style="display:flex;gap:12px;align-items:center;">
+            <label class="fl">Logo Aplikasi</label>
+            <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px;">
               <div id="logo-prev"></div>
               <div style="display:flex;flex-direction:column;gap:6px;" id="logo-actions">
-                <label class="btn btn-ghost btn-sm" id="btn-upload-logo-wrap" style="cursor:pointer;">📂 Unggah Logo<input type="file" id="fi-logo-input" accept="image/*" onchange="uploadLogo(event)" style="display:none"></label>
-                <button class="btn btn-ghost btn-sm" id="rm-logo-btn" onclick="removeLogo()" style="display:none;color:var(--danger)">🗑 Hapus Logo</button>
+                <label class="btn btn-ghost btn-sm" id="btn-upload-logo-wrap" style="cursor:pointer;">📂 Unggah Logo Kustom<input type="file" id="fi-logo-input" accept="image/*" onchange="uploadLogo(event)" style="display:none"></label>
+                <button class="btn btn-ghost btn-sm" id="rm-logo-btn" onclick="removeLogo()" style="display:none;color:var(--danger)">🗑 Reset ke Default</button>
+              </div>
+            </div>
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;">
+              <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Pilihan Logo Bawaan BalikinGo:</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="setPresetLogo('vector')" style="font-size:11px;padding:6px 10px;" title="Vektor Modern Resmi">✨ Vektor Modern (Default)</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="setPresetLogo('cinema')" style="font-size:11px;padding:6px 10px;" title="3D Cinema Camera &amp; Glowing Orbit">🎬 3D Cinema Camera</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="setPresetLogo('clapper')" style="font-size:11px;padding:6px 10px;" title="Flat Clapperboard &amp; Orbit G">📋 Clapperboard Minimal</button>
               </div>
             </div>
           </div>
@@ -2428,14 +2439,21 @@ function applyBranding() {
   if (hOrg) hOrg.textContent = org || 'BalikinGo';
   const hLogo = document.getElementById('hdr-logo');
   const hPh   = document.getElementById('hdr-logo-ph');
-  if (logo) { hLogo.src=logo; hLogo.classList.remove('hidden'); hPh.classList.add('hidden'); }
-  else      { hLogo.classList.add('hidden'); hPh.classList.remove('hidden'); }
+  if (logo) {
+    hLogo.src = logo;
+    hLogo.classList.remove('hidden');
+    hPh.classList.add('hidden');
+  } else {
+    hLogo.classList.add('hidden');
+    hPh.classList.remove('hidden');
+    hPh.innerHTML = `<img src="icon.svg" style="width:100%;height:100%;object-fit:cover;" alt="BalikinGo">`;
+  }
   const lOrg = document.getElementById('login-org');
   if (lOrg) lOrg.textContent = org || 'BalikinGo';
   const lBox = document.getElementById('login-logo-box');
   if (lBox) {
     if (logo) lBox.innerHTML = `<img src="${logo}" style="width:100%;height:100%;object-fit:cover;" alt="logo">`;
-    else lBox.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z" fill="white"/></svg>`;
+    else lBox.innerHTML = `<img src="logo.svg" style="width:100%;height:100%;object-fit:cover;" alt="BalikinGo Logo">`;
   }
   applyDark(db.settings.dark);
 }
@@ -3499,7 +3517,7 @@ function renderSettings() {
     if (lp) lp.innerHTML = `<img src="${db.settings.logo}" style="width:60px;height:60px;border-radius:12px;object-fit:cover;border:2px solid var(--border);">`;
     if (rb) rb.style.display = S.isAdmin ? 'block' : 'none';
   } else {
-    if (lp) lp.innerHTML = `<div style="width:60px;height:60px;border-radius:12px;background:var(--surface2);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text2)">No logo</div>`;
+    if (lp) lp.innerHTML = `<div style="width:60px;height:60px;border-radius:12px;background:var(--surface2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;" title="Logo Bawaan (Default)"><img src="logo.svg" style="width:100%;height:100%;object-fit:cover;"></div>`;
     if (rb) rb.style.display = 'none';
   }
   const dt = document.getElementById('dark-tog');
@@ -3548,12 +3566,38 @@ function renderSettings() {
   initReportForm();
 }
 
+function setPresetLogo(type) {
+  if (!S.isAdmin) return;
+  if (type === 'cinema') {
+    db.settings.logo = 'logo-cinema.jpg';
+  } else if (type === 'clapper') {
+    db.settings.logo = 'logo-clapper.jpg';
+  } else {
+    db.settings.logo = '';
+  }
+  save();
+  renderSettings();
+  applyBranding();
+  toast('Preset logo BalikinGo berhasil diterapkan.', 'ok');
+}
+
 async function uploadLogo(ev) {
   const file = ev.target.files[0]; if (!file) return;
   db.settings.logo = await shrink(file);
-  renderSettings(); applyBranding(); ev.target.value='';
+  save();
+  renderSettings();
+  applyBranding();
+  ev.target.value = '';
+  toast('Logo kustom berhasil diunggah.', 'ok');
 }
-function removeLogo() { db.settings.logo=''; renderSettings(); applyBranding(); }
+
+function removeLogo() {
+  db.settings.logo = '';
+  save();
+  renderSettings();
+  applyBranding();
+  toast('Logo dikembalikan ke default.', 'ok');
+}
 
 function saveSettings() {
   db.settings.org = document.getElementById('s-org').value.trim() || 'BalikinGo';
